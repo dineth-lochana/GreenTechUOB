@@ -12,7 +12,7 @@
 ## Feature Implementation Breakdown
 | Member | Feature |
 |----------|----------|
-| Dineth Mallawarachchi | Authentication, Scaffolding Client and Server, Variable Drives (Create, View, Delete, Update), Ranking for Variable Drives, Implementing HashRouter, All Deployment Pipelines |
+| Dineth Mallawarachchi | Authentication, Scaffolding Client and Server, Variable Drives (Create, View, Delete, Update), Ranking for Variable Drives, Implementing HashRouter, All Deployment Pipelines  |
 | Shehan Sangeeth |  | 
 | Dhananjaya Dilshan |  | 
 | Dineth Jayawickrama |  |
