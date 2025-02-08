@@ -13,7 +13,7 @@
 | Member | Feature |
 |----------|----------|
 | Dineth Mallawarachchi | 1. Authentication<br> 2. Scaffolding Client and Server<br> 3. Variable Drives (Create, View, Delete, Update)<br> 4. Ranking for Variable Drives<br> 5. Implementing HashRouter for Client Deployment<br> 6. All Server Deployment Pipelines<br> 7. All Github Actions Workflow<br> 8. Implementing Compliance Test Workflows<br> |
-| Shehan Sangeeth |  | 
+| Shehan Sangeeth |   | 
 | Dhananjaya Dilshan |  | 
 | Dineth Jayawickrama |  |
 | Imasha Dissanayaka  |  | 
