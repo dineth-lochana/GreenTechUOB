@@ -32,7 +32,7 @@ function VariableDrives() {
     const [favoriteDriveIds, setFavoriteDriveIds] = useState([]);
     const [sortCriteria, setSortCriteria] = useState('name');
     const [searchQuery, setSearchQuery] = useState('');
-    const [isImageLoading, setIsImageLoading] = useState(false);
+    
 
     useEffect(() => {
         const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
@@ -399,7 +399,7 @@ const DriveForm = ({ initialData, onSave, onCancel, formType }) => {
     const [image, setImage] = useState(initialData?.image || '');
     const [misc, setMisc] = useState(initialData?.misc || '');
     const [previewImage, setPreviewImage] = useState(initialData?.image || null);
-
+    const [isImageLoading, setIsImageLoading] = useState(false);
 
     const handleSubmit = async (event) => {
         event.preventDefault();
