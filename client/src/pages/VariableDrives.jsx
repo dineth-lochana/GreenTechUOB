@@ -32,7 +32,7 @@ function VariableDrives() {
     const [favoriteDriveIds, setFavoriteDriveIds] = useState([]);
     const [sortCriteria, setSortCriteria] = useState('name');
     const [searchQuery, setSearchQuery] = useState('');
-
+    const [isImageLoading, setIsImageLoading] = useState(false);
 
     useEffect(() => {
         const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
@@ -403,6 +403,10 @@ const DriveForm = ({ initialData, onSave, onCancel, formType }) => {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
+        if (isImageLoading) {
+            alert("Please wait for the image to finish loading before saving.");
+            return;
+        }
         const driveData = { name, content, price, image, misc, view_count: initialData?.view_count || 0 };
         if (formType === 'edit') {
             await onSave(initialData.id, driveData);
@@ -415,6 +419,8 @@ const DriveForm = ({ initialData, onSave, onCancel, formType }) => {
         const file = event.target.files[0];
         if (!file) return;
 
+        setIsImageLoading(true);
+        
         try {
             const compressedFile = await imageCompression(file, {
                 maxSizeMB: 0.1,
@@ -427,10 +433,12 @@ const DriveForm = ({ initialData, onSave, onCancel, formType }) => {
                 const base64String = reader.result;
                 setImage(base64String);
                 setPreviewImage(base64String);
+                setIsImageLoading(false); 
             };
             reader.readAsDataURL(compressedFile);
         } catch (error) {
             console.error('Image compression error:', error);
+            setIsImageLoading(false);
             const reader = new FileReader();
             reader.onloadend = () => {
                 const base64String = reader.result;
