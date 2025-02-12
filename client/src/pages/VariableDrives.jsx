@@ -10,8 +10,11 @@ import {
     addDoc,
     updateDoc,
     deleteDoc,
-    increment
+    increment,
+    arrayUnion,
+    arrayRemove
 } from 'firebase/firestore';
+import imageCompression from 'browser-image-compression';
 
 function VariableDrives() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -24,16 +27,35 @@ function VariableDrives() {
     const [isCreatingNew, setIsCreatingNew] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
-    const [isLoading, setIsLoading] = useState(true); 
+    const [isLoading, setIsLoading] = useState(true);
+    const [favoriteDriveIds, setFavoriteDriveIds] = useState([]);
+    const [sortCriteria, setSortCriteria] = useState('name');
+    const [searchQuery, setSearchQuery] = useState('');
+
 
     useEffect(() => {
-        const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+        const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
             if (user) {
                 setIsLoggedIn(true);
                 setUserEmail(user.email);
+                const userRef = doc(db, 'users', user.email);
+                try {
+                    const userSnap = await getDoc(userRef);
+                    if (userSnap.exists()) {
+                        const userData = userSnap.data();
+                        setFavoriteDriveIds(userData.favorites || []);
+                    } else {
+                        console.log("No user document found for this email.");
+                        setFavoriteDriveIds([]);
+                    }
+                } catch (error) {
+                    console.error("Error fetching user data:", error);
+                    setErrorMessage('Error loading user data.');
+                }
             } else {
                 setIsLoggedIn(false);
                 setUserEmail(null);
+                setFavoriteDriveIds([]);
             }
         });
         return () => unsubscribeAuth();
@@ -41,7 +63,7 @@ function VariableDrives() {
 
     useEffect(() => {
         const fetchVariableDrives = async () => {
-            setIsLoading(true); 
+            setIsLoading(true);
             try {
                 const drivesCollection = collection(db, 'variableDrives');
                 const querySnapshot = await getDocs(drivesCollection);
@@ -64,7 +86,7 @@ function VariableDrives() {
         setIsCreatingNew(false);
         setErrorMessage('');
         setSuccessMessage('');
-        setIsLoading(true); 
+        setIsLoading(true);
         try {
             const driveDocRef = doc(db, 'variableDrives', id);
             await updateDoc(driveDocRef, { view_count: increment(1) });
@@ -76,11 +98,11 @@ function VariableDrives() {
                 console.error('Variable drive details not found');
                 setErrorMessage('Variable Drive details not found.');
             }
-            setIsLoading(false); 
+            setIsLoading(false);
         } catch (error) {
             console.error('Error fetching variable drive details:', error);
             setErrorMessage('Error loading Variable Drive details.');
-            setIsLoading(false); 
+            setIsLoading(false);
         }
     };
 
@@ -96,19 +118,19 @@ function VariableDrives() {
         if (!window.confirm('Are you sure you want to delete this Variable Drive?')) {
             return;
         }
-        setIsLoading(true); 
+        setIsLoading(true);
         try {
             const driveDocRef = doc(db, 'variableDrives', id);
             await deleteDoc(driveDocRef);
             setVariableDrives(variableDrives.filter(drive => drive.id !== id));
             setSuccessMessage('Variable Drive deleted successfully.');
             setErrorMessage('');
-            setIsLoading(false); 
+            setIsLoading(false);
         } catch (error) {
             console.error('Error deleting variable drive:', error);
             setErrorMessage('Error deleting Variable Drive.');
             setSuccessMessage('');
-            setIsLoading(false); 
+            setIsLoading(false);
         }
     };
 
@@ -142,26 +164,108 @@ function VariableDrives() {
         setSuccessMessage('');
     };
 
-    const renderDriveGrid = () => (
-        <div className="variable-drives-grid">
-            {variableDrives.map(drive => (
-                <div key={drive.id} className="drive-card">
-                    <img src={drive.image} alt={drive.name} className="drive-image" />
-                    <h3>{drive.name}</h3>
-                    <p>Price: {drive.price}</p>
-                    <div className="drive-actions">
-                        <button onClick={() => handleViewDetails(drive.id)}>View Details</button>
-                        {isLoggedIn && (
-                            <>
-                                <button onClick={() => handleEditDrive(drive.id)}>Edit</button>
-                                <button onClick={() => handleDeleteDrive(drive.id)}>Delete</button>
-                            </>
-                        )}
+
+    const handleToggleFavorite = async (driveId) => {
+        if (!isLoggedIn) {
+            alert("Please log in to favorite drives.");
+            return;
+        }
+
+        const userRef = doc(db, 'users', userEmail);
+        const isFavorite = favoriteDriveIds.includes(driveId);
+
+        try {
+            if (isFavorite) {
+                await updateDoc(userRef, {
+                    favorites: arrayRemove(driveId)
+                });
+                setFavoriteDriveIds(favoriteDriveIds.filter(id => id !== driveId));
+            } else {
+                await updateDoc(userRef, {
+                    favorites: arrayUnion(driveId)
+                });
+                setFavoriteDriveIds([...favoriteDriveIds, driveId]);
+            }
+        } catch (error) {
+            console.error("Error toggling favorite:", error);
+            setErrorMessage('Error updating favorites.');
+        }
+    };
+
+    const handleSortChange = (event) => {
+        setSortCriteria(event.target.value);
+    };
+
+    const handleSearchChange = (event) => {
+        setSearchQuery(event.target.value);
+    };
+
+
+    const renderDriveGrid = () => {
+        let filteredDrives = [...variableDrives];
+
+        if (searchQuery) {
+            const lowerQuery = searchQuery.toLowerCase();
+            filteredDrives = filteredDrives.filter(drive => {
+                return (
+                    drive.name.toLowerCase().includes(lowerQuery) ||
+                    drive.content.toLowerCase().includes(lowerQuery)
+                );
+            });
+        }
+
+        let sortedAndFilteredDrives = [...filteredDrives];
+
+        if (sortCriteria === 'name') {
+            sortedAndFilteredDrives.sort((a, b) => a.name.localeCompare(b.name));
+        } else if (sortCriteria === 'price') {
+            sortedAndFilteredDrives.sort((a, b) => {
+                const priceA = parseFloat(a.price.replace(/[^0-9.]/g, '')) || 0;
+                const priceB = parseFloat(b.price.replace(/[^0-9.]/g, '')) || 0;
+                return priceA - priceB;
+            });
+        } else if (sortCriteria === 'view_count') {
+            sortedAndFilteredDrives.sort((a, b) => b.view_count - a.view_count);
+        }
+
+
+        const finalDrives = [...sortedAndFilteredDrives].sort((a, b) => {
+            const aIsFavorite = favoriteDriveIds.includes(a.id);
+            const bIsFavorite = favoriteDriveIds.includes(b.id);
+            if (aIsFavorite && !bIsFavorite) return -1;
+            if (!aIsFavorite && bIsFavorite) return 1;
+            return 0;
+        });
+
+
+        return (
+            <div className="variable-drives-grid">
+                {finalDrives.map(drive => (
+                    <div key={drive.id} className="drive-card">
+                        <img src={drive.image} alt={drive.name} className="drive-image" />
+                        <h3>{drive.name}</h3>
+                        <p>Price: {drive.price}</p>
+                        <div className="drive-actions">
+                            <button onClick={() => handleViewDetails(drive.id)}>View Details</button>
+                            {isLoggedIn && (
+                                <>
+                                    <button onClick={() => handleEditDrive(drive.id)}>Edit</button>
+                                    <button onClick={() => handleDeleteDrive(drive.id)}>Delete</button>
+                                    <button
+                                        className={`favorite-button ${favoriteDriveIds.includes(drive.id) ? 'favorited' : ''}`}
+                                        onClick={() => handleToggleFavorite(drive.id)}
+                                        aria-label={favoriteDriveIds.includes(drive.id) ? 'Remove from favorites' : 'Add to favorites'}
+                                    >
+                                        {favoriteDriveIds.includes(drive.id) ? '❤️' : '🤍'}
+                                    </button>
+                                </>
+                            )}
+                        </div>
                     </div>
-                </div>
-            ))}
-        </div>
-    );
+                ))}
+            </div>
+        );
+    };
 
     const renderDriveDetails = () => {
         if (!selectedDriveDetails) return <div>Loading details...</div>;
@@ -199,7 +303,7 @@ function VariableDrives() {
     };
 
     const handleCreateDrive = async (driveData) => {
-        setIsLoading(true); 
+        setIsLoading(true);
         try {
             const drivesCollection = collection(db, 'variableDrives');
             await addDoc(drivesCollection, driveData);
@@ -210,17 +314,17 @@ function VariableDrives() {
             setIsCreatingNew(false);
             setSuccessMessage('Variable Drive created successfully.');
             setErrorMessage('');
-            setIsLoading(false); 
+            setIsLoading(false);
         } catch (error) {
             console.error('Error creating variable drive:', error);
             setErrorMessage('Error creating Variable Drive.');
             setSuccessMessage('');
-            setIsLoading(false); 
+            setIsLoading(false);
         }
     };
 
     const handleUpdateDrive = async (id, driveData) => {
-        setIsLoading(true); 
+        setIsLoading(true);
         try {
             const driveDocRef = doc(db, 'variableDrives', id);
             await updateDoc(driveDocRef, driveData);
@@ -231,12 +335,12 @@ function VariableDrives() {
             setEditingDriveId(null);
             setSuccessMessage('Variable Drive updated successfully.');
             setErrorMessage('');
-            setIsLoading(false); 
+            setIsLoading(false);
         } catch (error) {
             console.error('Error updating variable drive:', error);
             setErrorMessage('Error updating Variable Drive.');
             setSuccessMessage('');
-            setIsLoading(false); 
+            setIsLoading(false);
         }
     };
 
@@ -248,10 +352,29 @@ function VariableDrives() {
                 <button onClick={handleNewEntryClick} className="new-entry-button">New Entry</button>
             )}
 
+            <div className="search-filter-options">
+                <input
+                    type="text"
+                    placeholder="Search drives..."
+                    value={searchQuery}
+                    onChange={handleSearchChange}
+                />
+            </div>
+
+            <div className="sorting-options">
+                <label htmlFor="sort">Sort by:</label>
+                <select id="sort" value={sortCriteria} onChange={handleSortChange}>
+                    <option value="name">Name</option>
+                    <option value="price">Price</option>
+                    <option value="view_count">View Count</option>
+                </select>
+            </div>
+
+
             {errorMessage && <p className="error-message">{errorMessage}</p>}
             {successMessage && <p className="success-message">{successMessage}</p>}
 
-            {isLoading ? ( 
+            {isLoading ? (
                 <div className="loading-spinner">
                     <div className="spinner"></div>
                     <p>Loading Variable Drives...</p>
@@ -287,17 +410,34 @@ const DriveForm = ({ initialData, onSave, onCancel, formType }) => {
         }
     };
 
-    const handleImageChange = (event) => {
+    const handleImageChange = async (event) => {
         const file = event.target.files[0];
         if (!file) return;
 
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            const base64String = reader.result;
-            setImage(base64String);
-            setPreviewImage(base64String);
-        };
-        reader.readAsDataURL(file);
+        try {
+            const compressedFile = await imageCompression(file, {
+                maxSizeMB: 0.5,
+                maxWidthOrHeight: 800,
+                useWebWorker: true,
+            });
+
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const base64String = reader.result;
+                setImage(base64String);
+                setPreviewImage(base64String);
+            };
+            reader.readAsDataURL(compressedFile);
+        } catch (error) {
+            console.error('Image compression error:', error);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const base64String = reader.result;
+                setImage(base64String);
+                setPreviewImage(base64String);
+            };
+            reader.readAsDataURL(file);
+        }
     };
 
 
