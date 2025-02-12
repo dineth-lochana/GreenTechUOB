@@ -32,25 +32,24 @@ function VariableDrives() {
     const [sortCriteria, setSortCriteria] = useState('name');
     const [searchQuery, setSearchQuery] = useState('');
 
-
     useEffect(() => {
         const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
             if (user) {
                 setIsLoggedIn(true);
                 setUserEmail(user.email);
-                const userRef = doc(db, 'users', user.email);
+                const favoritesDocRef = doc(db, 'userFavorites', user.email); 
                 try {
-                    const userSnap = await getDoc(userRef);
-                    if (userSnap.exists()) {
-                        const userData = userSnap.data();
-                        setFavoriteDriveIds(userData.favorites || []);
+                    const docSnap = await getDoc(favoritesDocRef);
+                    if (docSnap.exists()) {
+                        const favoritesData = docSnap.data();
+                        setFavoriteDriveIds(favoritesData.driveIds || []);
                     } else {
-                        console.log("No user document found for this email.");
                         setFavoriteDriveIds([]);
+                        await setDoc(favoritesDocRef, { driveIds: [] });
                     }
                 } catch (error) {
-                    console.error("Error fetching user data:", error);
-                    setErrorMessage('Error loading user data.');
+                    console.error("Error fetching favorites:", error);
+                    setErrorMessage('Error loading favorites.');
                 }
             } else {
                 setIsLoggedIn(false);
