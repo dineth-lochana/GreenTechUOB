@@ -193,6 +193,7 @@ p {
   color: #333;
 }
 
+
 /* General Responsive Layout */
 @media (max-width: 768px) {
   main {
