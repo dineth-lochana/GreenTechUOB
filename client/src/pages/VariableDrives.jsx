@@ -12,7 +12,8 @@ import {
     deleteDoc,
     increment,
     arrayUnion,
-    arrayRemove
+    arrayRemove,
+    setDoc
 } from 'firebase/firestore';
 import imageCompression from 'browser-image-compression';
 
@@ -32,12 +33,13 @@ function VariableDrives() {
     const [sortCriteria, setSortCriteria] = useState('name');
     const [searchQuery, setSearchQuery] = useState('');
 
+
     useEffect(() => {
         const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
             if (user) {
                 setIsLoggedIn(true);
                 setUserEmail(user.email);
-                const favoritesDocRef = doc(db, 'userFavorites', user.email); 
+                const favoritesDocRef = doc(db, 'userFavorites', user.email);
                 try {
                     const docSnap = await getDoc(favoritesDocRef);
                     if (docSnap.exists()) {
@@ -170,18 +172,18 @@ function VariableDrives() {
             return;
         }
 
-        const userRef = doc(db, 'users', userEmail);
+        const favoritesDocRef = doc(db, 'userFavorites', userEmail);
         const isFavorite = favoriteDriveIds.includes(driveId);
 
         try {
             if (isFavorite) {
-                await updateDoc(userRef, {
-                    favorites: arrayRemove(driveId)
+                await updateDoc(favoritesDocRef, {
+                    driveIds: arrayRemove(driveId)
                 });
                 setFavoriteDriveIds(favoriteDriveIds.filter(id => id !== driveId));
             } else {
-                await updateDoc(userRef, {
-                    favorites: arrayUnion(driveId)
+                await updateDoc(favoritesDocRef, {
+                    driveIds: arrayUnion(driveId)
                 });
                 setFavoriteDriveIds([...favoriteDriveIds, driveId]);
             }
