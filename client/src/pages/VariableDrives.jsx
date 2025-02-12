@@ -417,7 +417,7 @@ const DriveForm = ({ initialData, onSave, onCancel, formType }) => {
 
         try {
             const compressedFile = await imageCompression(file, {
-                maxSizeMB: 0.5,
+                maxSizeMB: 0.1,
                 maxWidthOrHeight: 800,
                 useWebWorker: true,
             });
