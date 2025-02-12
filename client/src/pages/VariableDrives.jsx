@@ -12,32 +12,25 @@ import {
     deleteDoc,
     increment,
     arrayUnion,
-    arrayRemove
+    arrayRemove,
+    setDoc // Import setDoc
 } from 'firebase/firestore';
 import imageCompression from 'browser-image-compression';
 
 function VariableDrives() {
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [userEmail, setUserEmail] = useState(null);
-    const [variableDrives, setVariableDrives] = useState([]);
-    const [selectedDriveId, setSelectedDriveId] = useState(null);
-    const [selectedDriveDetails, setSelectedDriveDetails] = useState(null);
-    const [isEditing, setIsEditing] = useState(false);
-    const [editingDriveId, setEditingDriveId] = useState(null);
-    const [isCreatingNew, setIsCreatingNew] = useState(false);
-    const [errorMessage, setErrorMessage] = useState('');
-    const [successMessage, setSuccessMessage] = useState('');
+    // ... (rest of your state variables - same as before)
     const [isLoading, setIsLoading] = useState(true);
     const [favoriteDriveIds, setFavoriteDriveIds] = useState([]);
     const [sortCriteria, setSortCriteria] = useState('name');
     const [searchQuery, setSearchQuery] = useState('');
+
 
     useEffect(() => {
         const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
             if (user) {
                 setIsLoggedIn(true);
                 setUserEmail(user.email);
-                const favoritesDocRef = doc(db, 'userFavorites', user.email); 
+                const favoritesDocRef = doc(db, 'userFavorites', user.email);
                 try {
                     const docSnap = await getDoc(favoritesDocRef);
                     if (docSnap.exists()) {
@@ -45,7 +38,7 @@ function VariableDrives() {
                         setFavoriteDriveIds(favoritesData.driveIds || []);
                     } else {
                         setFavoriteDriveIds([]);
-                        await setDoc(favoritesDocRef, { driveIds: [] });
+                        await setDoc(favoritesDocRef, { driveIds: [] }); // Create doc if not exists
                     }
                 } catch (error) {
                     console.error("Error fetching favorites:", error);
@@ -170,18 +163,18 @@ function VariableDrives() {
             return;
         }
 
-        const userRef = doc(db, 'users', userEmail);
+        const favoritesDocRef = doc(db, 'userFavorites', userEmail);
         const isFavorite = favoriteDriveIds.includes(driveId);
 
         try {
             if (isFavorite) {
-                await updateDoc(userRef, {
-                    favorites: arrayRemove(driveId)
+                await updateDoc(favoritesDocRef, {
+                    driveIds: arrayRemove(driveId)
                 });
                 setFavoriteDriveIds(favoriteDriveIds.filter(id => id !== driveId));
             } else {
-                await updateDoc(userRef, {
-                    favorites: arrayUnion(driveId)
+                await updateDoc(favoritesDocRef, {
+                    driveIds: arrayUnion(driveId)
                 });
                 setFavoriteDriveIds([...favoriteDriveIds, driveId]);
             }
