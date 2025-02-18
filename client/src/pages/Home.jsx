@@ -174,7 +174,7 @@ function Home() {
         <hr style={hrStyle} />
         
       </div>
-      <Chatbot chatbotId="process.env.VITE_Chatling_API_KEY" />
+      <Chatbot chatbotId={process.env.VITE_Chatling_API_KEY} />
       <footer />
     </div>
   );
