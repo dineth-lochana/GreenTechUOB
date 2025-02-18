@@ -7,6 +7,7 @@ import FireSafety from './pages/FireSafety.jsx';
 import VariableDrives from './pages/VariableDrives.jsx';
 import ProjectShowcase from './pages/ProjectShowcase.jsx';
 import LoginRegister from './pages/LoginRegister.jsx';
+import Learn from './pages/Learn.jsx';
 import NotFound from './pages/NotFound.jsx';
 import './App.css';
 import { Routes, Route } from 'react-router-dom';
@@ -23,6 +24,7 @@ function App() {
                     <Route path="/variableDrives" element={<VariableDrives />} />
                     <Route path="/projectShowcase" element={<ProjectShowcase />} />
                     <Route path="/loginRegister" element={<LoginRegister />} />
+                    <Route path="/Learn" element={<Learn />} />
                     <Route path="*" element={<NotFound />} />
                 </Routes>
             </main>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Slider from "../components/Slider";
+import Chatbot from '../components/Chatbot';
 import { motion } from "framer-motion";
 
 const fadeInUp = {
@@ -63,6 +64,7 @@ const welcomeTextStyle = {
 };
 
 
+
 const InfoSection = ({ title, text, imgSrc, imagePosition = 'right' }) => {
   const imageMotion = imagePosition === 'right' ? slideInRight : slideInLeft;
   const textMotion = fadeInUp;
@@ -118,6 +120,7 @@ const InfoSection = ({ title, text, imgSrc, imagePosition = 'right' }) => {
 function Home() {
 
   return (
+    
     <div>
       <Slider />
       <motion.p
@@ -169,7 +172,9 @@ function Home() {
 
         <br />
         <hr style={hrStyle} />
+        
       </div>
+      <Chatbot chatbotId="process.env.VITE_chatling_API_KEY" />
       <footer />
     </div>
   );

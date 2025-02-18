@@ -47,6 +47,7 @@ function Navbar() {
                     <li><a href="./#/fireSafety">Fire Safety</a></li>
                     <li><a href="./#/variableDrives">Variable Drives</a></li>
                     <li><a href="./#/projectShowcase">Project Showcase</a></li>
+                    <li><a href="./#/Learn">Learn</a></li>
                     {isLoggedIn ? (
                         <>
                             <li><span>{userEmail}</span></li>
