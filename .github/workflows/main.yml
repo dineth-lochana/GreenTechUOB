@@ -53,6 +53,8 @@ jobs:
         working-directory: client
         env:
           VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
+          VITE_GEMINI_API_KEY: ${{ secrets.VITE_GEMINI_API_KEY }}
+          VITE_Chatling_API_KEY: ${{ secrets.VITE_Chatling_API_KEY }}
         run: |
           npm install
           npm run build
