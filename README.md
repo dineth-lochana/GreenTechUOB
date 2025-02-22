@@ -13,7 +13,7 @@
 | Member | Feature |
 |----------|----------|
 | Dineth Mallawarachchi | 1. Authentication<br> 2. Scaffolding Client and Server<br> 3. Variable Drives (Create, View, Delete, Update)<br> 4. Ranking for Variable Drives<br> 5. Implementing HashRouter for Client Deployment<br> 6. All Server Deployment Pipelines<br> 7. All Github Actions Workflow<br> 8. Implementing Compliance Test Workflows<br>  9. Firebase Integeration<br> |
-| Shehan Sangeeth |1.Fire Safety Products page<br> 2.Solar Calculator<br> | 
+| Shehan Sangeeth |1.Fire Safety Products (Search, Create, View, Delete, Update)<br> 2.Solar Calculator<br> | 
 | Dhananjaya Dilshan | 1.Home page<br> | 2.footer seaction <br> | 3.AI education seaction/FAQ <br> | 4.Chatbote<br>| 5. Github Actions Eslint and Jest Workflow<br>
 | Dineth Jayawickrama |  |
 | Imasha Dissanayaka  |  | 
