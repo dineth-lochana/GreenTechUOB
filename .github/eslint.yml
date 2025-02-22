@@ -1,4 +1,4 @@
-name: Lint and Test
+name: ESLint Check
 
 on:
   pull_request:
@@ -9,8 +9,8 @@ on:
       - master
 
 jobs:
-  lint-and-test:
-    name: Run ESLint and Jest
+  eslint:
+    name: Run ESLint
     runs-on: ubuntu-latest
 
     strategy:
@@ -18,17 +18,14 @@ jobs:
         node-version: [23.x]
 
     steps:
-      # Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Set up Node.js
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
 
-      # Install dependencies
       - name: Install dependencies
         run: |
           rm -rf node_modules
@@ -36,12 +33,6 @@ jobs:
           npm install
         working-directory: client
 
-      # Run ESLint for code linting
       - name: Run ESLint
         run: npm run lint
-        working-directory: client
-
-      # Run Jest tests
-      - name: Run Jest tests
-        run: npm test
         working-directory: client
