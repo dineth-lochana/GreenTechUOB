@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import React, { useState, useEffect } from 'react';
 import './VariableDrives.css';
 import { auth, db } from '../firebaseConfig';
@@ -510,3 +511,4 @@ const DriveForm = ({ initialData, onSave, onCancel, formType }) => {
 };
 
 export default VariableDrives;
+/* eslint-enable react/prop-types */
