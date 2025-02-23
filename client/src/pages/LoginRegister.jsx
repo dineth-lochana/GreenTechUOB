@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebaseConfig';
 
@@ -24,6 +24,7 @@ function LoginRegister() {
                 setMessage('Login successful.');
                 alert('Login Successful! Refresh the page to see logged in state.');
             }
+            // eslint-disable-next-line no-unused-vars 
             const user = userCredential.user; 
         } catch (error) {
             console.error("Firebase Auth error:", error);
