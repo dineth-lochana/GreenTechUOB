@@ -282,6 +282,10 @@ function VariableDrives() {
                     <p><strong>Price:</strong> {selectedDriveDetails.price}</p>
                     <p><strong>Misc:</strong> {selectedDriveDetails.misc}</p>
                     {selectedDriveDetails.specificationDocument && (
+                    <br/>
+                    <br/> 
+                    )}
+                    {selectedDriveDetails.specificationDocument && (
                         <a href={selectedDriveDetails.specificationDocument} target="_blank" rel="noopener noreferrer">
                             <button>Download Specification Document</button>
                         </a>
