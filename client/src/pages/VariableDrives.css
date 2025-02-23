@@ -1,3 +1,4 @@
+
 .variable-drives-page {
     padding: 20px;
 }
@@ -38,20 +39,50 @@
     background-color: #68dd78;
 }
 
-.drive-details {
+.drive-details-container {
+    display: flex;
+    flex-direction: row;
     padding: 20px;
     border: 1px solid #ccc;
     border-radius: 8px;
     margin-top: 20px;
 }
 
+.drive-image-container {
+    flex: 1; 
+    padding: 10px;
+}
+
+.drive-details {
+    flex: 1;
+    padding: 10px;
+}
+
+
 .drive-details-image {
-    max-width: 50%;
+    max-width: 100%; 
     height: auto;
     display: block;
     margin: 0 auto 20px;
     border-radius: 4px;
 }
+
+@media (max-width: 768px) {
+    .drive-details-container {
+        flex-direction: column;
+    }
+
+    .drive-image-container,
+    .drive-details {
+        flex: none;
+        width: 100%; 
+    }
+
+    .drive-details-image {
+        max-width: 100%; 
+    }
+}
+
 
 .drive-form {
     max-width: 600px;
@@ -152,7 +183,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    margin-top: 50px; /* Adjust as needed */
+    margin-top: 50px; 
 }
 
 .spinner {
@@ -178,7 +209,7 @@
   padding: 8px;
   border: 1px solid #ccc;
   border-radius: 4px;
-  flex-grow: 1; 
+  flex-grow: 1;
 }
 
 .sorting-options select {
@@ -188,7 +219,7 @@
 }
 
 .favorite-button.favorited {
-    color: red; 
+    color: red;
 }
 
 
