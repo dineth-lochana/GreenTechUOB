@@ -287,6 +287,7 @@ function VariableDrives() {
                         </a>
                     )}
                     <br/>
+                    <br/>
                     <button onClick={handleBackToGrid}>Back to Variable Drive List</button>
                 </div>
             </div>
