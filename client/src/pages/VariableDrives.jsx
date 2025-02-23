@@ -286,6 +286,7 @@ function VariableDrives() {
                             <button>Download Specification Document</button>
                         </a>
                     )}
+                    <br/>
                     <button onClick={handleBackToGrid}>Back to Variable Drive List</button>
                 </div>
             </div>
