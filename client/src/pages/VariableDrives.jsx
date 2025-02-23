@@ -32,7 +32,7 @@ function VariableDrives() {
     const [favoriteDriveIds, setFavoriteDriveIds] = useState([]);
     const [sortCriteria, setSortCriteria] = useState('name');
     const [searchQuery, setSearchQuery] = useState('');
-    
+
 
     useEffect(() => {
         const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
@@ -272,13 +272,22 @@ function VariableDrives() {
         if (!selectedDriveDetails) return <div>Loading details...</div>;
 
         return (
-            <div className="drive-details">
-                <h2>{selectedDriveDetails.name}</h2>
-                <img src={selectedDriveDetails.image} alt={selectedDriveDetails.name} className="drive-details-image" />
-                <p><strong>Content:</strong> {selectedDriveDetails.content}</p>
-                <p><strong>Price:</strong> {selectedDriveDetails.price}</p>
-                <p><strong>Misc:</strong> {selectedDriveDetails.misc}</p>
-                <button onClick={handleBackToGrid}>Back to Variable Drive List</button>
+            <div className="drive-details-container">
+                <div className="drive-image-container">
+                    <img src={selectedDriveDetails.image} alt={selectedDriveDetails.name} className="drive-details-image" />
+                </div>
+                <div className="drive-details">
+                    <h2>{selectedDriveDetails.name}</h2>
+                    <p><strong>Content:</strong> {selectedDriveDetails.content}</p>
+                    <p><strong>Price:</strong> {selectedDriveDetails.price}</p>
+                    <p><strong>Misc:</strong> {selectedDriveDetails.misc}</p>
+                    {selectedDriveDetails.specificationDocument && (
+                        <a href={selectedDriveDetails.specificationDocument} target="_blank" rel="noopener noreferrer">
+                            <button>Download Specification Document</button>
+                        </a>
+                    )}
+                    <button onClick={handleBackToGrid}>Back to Variable Drive List</button>
+                </div>
             </div>
         );
     };
@@ -398,6 +407,7 @@ const DriveForm = ({ initialData, onSave, onCancel, formType }) => {
     const [price, setPrice] = useState(initialData?.price || '');
     const [image, setImage] = useState(initialData?.image || '');
     const [misc, setMisc] = useState(initialData?.misc || '');
+    const [specificationDocument, setSpecificationDocument] = useState(initialData?.specificationDocument || '');
     const [previewImage, setPreviewImage] = useState(initialData?.image || null);
     const [isImageLoading, setIsImageLoading] = useState(false);
 
@@ -407,7 +417,7 @@ const DriveForm = ({ initialData, onSave, onCancel, formType }) => {
             alert("Please wait for the image to finish loading before saving.");
             return;
         }
-        const driveData = { name, content, price, image, misc, view_count: initialData?.view_count || 0 };
+        const driveData = { name, content, price, image, misc, specificationDocument, view_count: initialData?.view_count || 0 };
         if (formType === 'edit') {
             await onSave(initialData.id, driveData);
         } else {
@@ -420,7 +430,7 @@ const DriveForm = ({ initialData, onSave, onCancel, formType }) => {
         if (!file) return;
 
         setIsImageLoading(true);
-        
+
         try {
             const compressedFile = await imageCompression(file, {
                 maxSizeMB: 0.1,
@@ -433,7 +443,7 @@ const DriveForm = ({ initialData, onSave, onCancel, formType }) => {
                 const base64String = reader.result;
                 setImage(base64String);
                 setPreviewImage(base64String);
-                setIsImageLoading(false); 
+                setIsImageLoading(false);
             };
             reader.readAsDataURL(compressedFile);
         } catch (error) {
@@ -473,6 +483,15 @@ const DriveForm = ({ initialData, onSave, onCancel, formType }) => {
             <div className="form-group">
                 <label htmlFor="misc">Misc:</label>
                 <input type="text" id="misc" value={misc} onChange={(e) => setMisc(e.target.value)} />
+            </div>
+            <div className="form-group">
+                <label htmlFor="specificationDocument">Specification Document URL:</label>
+                <input
+                    type="text"
+                    id="specificationDocument"
+                    value={specificationDocument}
+                    onChange={(e) => setSpecificationDocument(e.target.value)}
+                />
             </div>
             <div className="form-actions">
                 <button type="submit">Save</button>
