@@ -221,23 +221,22 @@ function VariableExtinguishers() {
         if (sortCriteria === 'name') {
             sortedAndFilteredExtinguishers.sort((a, b) => a.name.localeCompare(b.name));
         } else if (sortCriteria === 'price') {
-            sortedAndFilteredExtinguishers.sort((a, b) => {
-                const cleanPrice = (price) => {
-                    // Convert commas to periods first, then remove non-numeric characters except periods
-                     return parseFloat(
-                        price
-                            .replace(/,/g, '.')  // Replace commas with periods
-                            .replace(/[^0-9.]/g, '') // Remove remaining non-numeric characters
-                            .replace(/\.+/g, '.') // Replace multiple periods with single
-                        || 0
-                    );    
+    sortedAndFilteredExtinguishers.sort((a, b) => {
+        const cleanPrice = (price) => {
+            return parseFloat(
+                price
+                    .replace(/Rs\.?\s*/i, '') // Remove currency symbol
+                    .replace(/,/g, '') // Remove commas
+                    .replace(/[^0-9.]/g, '') // Remove non-numeric except periods
+                    || 0
+            );
         };
 
         const priceA = cleanPrice(a.price);
         const priceB = cleanPrice(b.price);
         return priceA - priceB;
     });
-        } else if (sortCriteria === 'view_count') {
+} else if (sortCriteria === 'view_count') {
             sortedAndFilteredExtinguishers.sort((a, b) => b.view_count - a.view_count);
         }
 
