@@ -67,7 +67,7 @@ function VariableExtinguishers() {
         const fetchFireExtinguishers = async () => {
             setIsLoading(true);
             try {
-                const extinguishersCollection = collection(db, 'fireExtinguisher');
+                const extinguishersCollection = collection(db, 'fireExtinguishers');
                 const querySnapshot = await getDocs(extinguishersCollection);
                 const extinguishersList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 setFireExtinguishers(extinguishersList);
@@ -295,7 +295,7 @@ function VariableExtinguishers() {
                     )}
                     <br/>
                     <br/>
-                    <button onClick={handleBackToGrid}>Back to Variable Extinguisher List</button>
+                    <button onClick={handleBackToGrid}>Back to Fire Extinguisher List</button>
                 </div>
             </div>
         );
@@ -331,12 +331,12 @@ function VariableExtinguishers() {
             setFireExtinguishers(extinguishersList);
 
             setIsCreatingNew(false);
-            setSuccessMessage('Variable Extinguisher created successfully.');
+            setSuccessMessage('Fire Extinguisher created successfully.');
             setErrorMessage('');
             setIsLoading(false);
         } catch (error) {
             console.error('Error creating Fire Extinguishers:', error);
-            setErrorMessage('Error creating Variable Extinguisher.');
+            setErrorMessage('Error creating Fire Extinguisher.');
             setSuccessMessage('');
             setIsLoading(false);
         }
@@ -352,12 +352,12 @@ function VariableExtinguishers() {
             setFireExtinguishers(extinguishersList);
             setIsEditing(false);
             setEditingExtinguisherId(null);
-            setSuccessMessage('Variable Extinguisher updated successfully.');
+            setSuccessMessage('Fire Extinguisher updated successfully.');
             setErrorMessage('');
             setIsLoading(false);
         } catch (error) {
             console.error('Error updating Fire Extinguishers:', error);
-            setErrorMessage('Error updating Variable Extinguisher.');
+            setErrorMessage('Error updating Fire Extinguisher.');
             setSuccessMessage('');
             setIsLoading(false);
         }
@@ -366,7 +366,7 @@ function VariableExtinguishers() {
 
     return (
         <div className="fire-extinguishers-page">
-            <h1>Variable Extinguishers Page</h1>
+            <h1>Fire Extinguishers Page</h1>
             {isLoggedIn && !isCreatingNew && !isEditing && !selectedExtinguisherId && (
                 <button onClick={handleNewEntryClick} className="new-entry-button">New Entry</button>
             )}
@@ -396,7 +396,7 @@ function VariableExtinguishers() {
             {isLoading ? (
                 <div className="loading-spinner">
                     <div className="spinner"></div>
-                    <p>Loading Variable Extinguishers...</p>
+                    <p>Loading Fire Extinguishers...</p>
                 </div>
             ) : (
                 isCreatingNew ? renderNewEntryForm() :
@@ -471,7 +471,7 @@ const ExtinguisherForm = ({ initialData, onSave, onCancel, formType }) => {
 
     return (
         <form onSubmit={handleSubmit} className="extinguisher-form">
-            <h2>{formType === 'edit' ? 'Edit Variable Extinguisher' : 'New Variable Extinguisher'}</h2>
+            <h2>{formType === 'edit' ? 'Edit Fire Extinguisher' : 'New Fire Extinguisher'}</h2>
             <div className="form-group">
                 <label htmlFor="name">Name:</label>
                 <input type="text" id="name" value={name} onChange={(e) => setName(e.target.value)} required />
