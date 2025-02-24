@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import { useState, useEffect } from 'react';
-import './VariableDrives.css';
+import './FireSafety.css';
 import { auth, db } from '../firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
 import {
@@ -18,22 +18,21 @@ import {
 } from 'firebase/firestore';
 import imageCompression from 'browser-image-compression';
 
-function VariableDrives() {
+function FireSafety() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [userEmail, setUserEmail] = useState(null);
-    const [variableDrives, setVariableDrives] = useState([]);
-    const [selectedDriveId, setSelectedDriveId] = useState(null);
-    const [selectedDriveDetails, setSelectedDriveDetails] = useState(null);
+    const [fireExtinguishers, setFireExtinguishers] = useState([]);
+    const [selectedExtinguisherId, setSelectedExtinguisherId] = useState(null);
+    const [selectedExtinguisherDetails, setSelectedExtinguisherDetails] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
-    const [editingDriveId, setEditingDriveId] = useState(null);
+    const [editingExtinguisherId, setEditingExtinguisherId] = useState(null);
     const [isCreatingNew, setIsCreatingNew] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
     const [isLoading, setIsLoading] = useState(true);
-    const [favoriteDriveIds, setFavoriteDriveIds] = useState([]);
+    const [favoriteExtinguisherIds, setFavoriteExtinguisherIds] = useState([]);
     const [sortCriteria, setSortCriteria] = useState('name');
     const [searchQuery, setSearchQuery] = useState('');
-
 
     useEffect(() => {
         const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
@@ -45,10 +44,10 @@ function VariableDrives() {
                     const docSnap = await getDoc(favoritesDocRef);
                     if (docSnap.exists()) {
                         const favoritesData = docSnap.data();
-                        setFavoriteDriveIds(favoritesData.driveIds || []);
+                        setFavoriteExtinguisherIds(favoritesData.extinguisherIds || []);
                     } else {
-                        setFavoriteDriveIds([]);
-                        await setDoc(favoritesDocRef, { driveIds: [] });
+                        setFavoriteExtinguisherIds([]);
+                        await setDoc(favoritesDocRef, { extinguisherIds: [] });
                     }
                 } catch (error) {
                     console.error("Error fetching favorites:", error);
@@ -57,89 +56,89 @@ function VariableDrives() {
             } else {
                 setIsLoggedIn(false);
                 setUserEmail(null);
-                setFavoriteDriveIds([]);
+                setFavoriteExtinguisherIds([]);
             }
         });
         return () => unsubscribeAuth();
     }, []);
 
     useEffect(() => {
-        const fetchVariableDrives = async () => {
+        const fetchFireExtinguishers = async () => {
             setIsLoading(true);
             try {
-                const drivesCollection = collection(db, 'variableDrives');
-                const querySnapshot = await getDocs(drivesCollection);
-                const drivesList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                setVariableDrives(drivesList);
+                const extinguishersCollection = collection(db, 'fireExtinguisher');
+                const querySnapshot = await getDocs(extinguishersCollection);
+                const extinguishersList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                setFireExtinguishers(extinguishersList);
                 setIsLoading(false);
             } catch (error) {
-                console.error('Error fetching variable drives:', error);
-                setErrorMessage('Error loading Variable Drives.');
+                console.error('Error fetching fire extinguishers:', error);
+                setErrorMessage('Error loading Fire Extinguishers.');
                 setIsLoading(false);
             }
         };
-        fetchVariableDrives();
+        fetchFireExtinguishers();
     }, []);
 
     const handleViewDetails = async (id) => {
-        setSelectedDriveId(id);
-        setSelectedDriveDetails(null);
+        setSelectedExtinguisherId(id);
+        setSelectedExtinguisherDetails(null);
         setIsEditing(false);
         setIsCreatingNew(false);
         setErrorMessage('');
         setSuccessMessage('');
         setIsLoading(true);
         try {
-            const driveDocRef = doc(db, 'variableDrives', id);
-            await updateDoc(driveDocRef, { view_count: increment(1) });
+            const extinguisherDocRef = doc(db, 'fireExtinguisher', id);
+            await updateDoc(extinguisherDocRef, { view_count: increment(1) });
 
-            const docSnap = await getDoc(driveDocRef);
+            const docSnap = await getDoc(extinguisherDocRef);
             if (docSnap.exists()) {
-                setSelectedDriveDetails({ id: docSnap.id, ...docSnap.data() });
+                setSelectedExtinguisherDetails({ id: docSnap.id, ...docSnap.data() });
             } else {
-                console.error('Variable drive details not found');
-                setErrorMessage('Variable Drive details not found.');
+                console.error('Fire extinguisher details not found');
+                setErrorMessage('Fire Extinguisher details not found.');
             }
             setIsLoading(false);
         } catch (error) {
-            console.error('Error fetching variable drive details:', error);
-            setErrorMessage('Error loading Variable Drive details.');
+            console.error('Error fetching fire extinguisher details:', error);
+            setErrorMessage('Error loading Fire Extinguisher details.');
             setIsLoading(false);
         }
     };
 
     const handleBackToGrid = () => {
-        setSelectedDriveId(null);
+        setSelectedExtinguisherId(null);
         setIsEditing(false);
         setIsCreatingNew(false);
         setErrorMessage('');
         setSuccessMessage('');
     };
 
-    const handleDeleteDrive = async (id) => {
-        if (!window.confirm('Are you sure you want to delete this Variable Drive?')) {
+    const handleDeleteExtinguisher = async (id) => {
+        if (!window.confirm('Are you sure you want to delete this Fire Extinguisher?')) {
             return;
         }
         setIsLoading(true);
         try {
-            const driveDocRef = doc(db, 'variableDrives', id);
-            await deleteDoc(driveDocRef);
-            setVariableDrives(variableDrives.filter(drive => drive.id !== id));
-            setSuccessMessage('Variable Drive deleted successfully.');
+            const extinguisherDocRef = doc(db, 'fireExtinguisher', id);
+            await deleteDoc(extinguisherDocRef);
+            setFireExtinguishers(fireExtinguishers.filter(extinguisher => extinguisher.id !== id));
+            setSuccessMessage('Fire Extinguisher deleted successfully.');
             setErrorMessage('');
             setIsLoading(false);
         } catch (error) {
-            console.error('Error deleting variable drive:', error);
-            setErrorMessage('Error deleting Variable Drive.');
+            console.error('Error deleting fire extinguisher:', error);
+            setErrorMessage('Error deleting Fire Extinguisher.');
             setSuccessMessage('');
             setIsLoading(false);
         }
     };
 
-    const handleEditDrive = (id) => {
-        setEditingDriveId(id);
+    const handleEditExtinguisher = (id) => {
+        setEditingExtinguisherId(id);
         setIsEditing(true);
-        setSelectedDriveId(null);
+        setSelectedExtinguisherId(null);
         setIsCreatingNew(false);
         setErrorMessage('');
         setSuccessMessage('');
@@ -147,14 +146,14 @@ function VariableDrives() {
 
     const handleCancelEdit = () => {
         setIsEditing(false);
-        setEditingDriveId(null);
+        setEditingExtinguisherId(null);
         setErrorMessage('');
         setSuccessMessage('');
     };
 
     const handleNewEntryClick = () => {
         setIsCreatingNew(true);
-        setSelectedDriveId(null);
+        setSelectedExtinguisherId(null);
         setIsEditing(false);
         setErrorMessage('');
         setSuccessMessage('');
@@ -166,27 +165,26 @@ function VariableDrives() {
         setSuccessMessage('');
     };
 
-
-    const handleToggleFavorite = async (driveId) => {
+    const handleToggleFavorite = async (extinguisherId) => {
         if (!isLoggedIn) {
-            alert("Please log in to favorite drives.");
+            alert("Please log in to favorite extinguishers.");
             return;
         }
 
         const favoritesDocRef = doc(db, 'userFavorites', userEmail);
-        const isFavorite = favoriteDriveIds.includes(driveId);
+        const isFavorite = favoriteExtinguisherIds.includes(extinguisherId);
 
         try {
             if (isFavorite) {
                 await updateDoc(favoritesDocRef, {
-                    driveIds: arrayRemove(driveId)
+                    extinguisherIds: arrayRemove(extinguisherId)
                 });
-                setFavoriteDriveIds(favoriteDriveIds.filter(id => id !== driveId));
+                setFavoriteExtinguisherIds(favoriteExtinguisherIds.filter(id => id !== extinguisherId));
             } else {
                 await updateDoc(favoritesDocRef, {
-                    driveIds: arrayUnion(driveId)
+                    extinguisherIds: arrayUnion(extinguisherId)
                 });
-                setFavoriteDriveIds([...favoriteDriveIds, driveId]);
+                setFavoriteExtinguisherIds([...favoriteExtinguisherIds, extinguisherId]);
             }
         } catch (error) {
             console.error("Error toggling favorite:", error);
@@ -202,63 +200,60 @@ function VariableDrives() {
         setSearchQuery(event.target.value);
     };
 
-
-    const renderDriveGrid = () => {
-        let filteredDrives = [...variableDrives];
+    const renderExtinguisherGrid = () => {
+        let filteredExtinguishers = [...fireExtinguishers];
 
         if (searchQuery) {
             const lowerQuery = searchQuery.toLowerCase();
-            filteredDrives = filteredDrives.filter(drive => {
+            filteredExtinguishers = filteredExtinguishers.filter(extinguisher => {
                 return (
-                    drive.name.toLowerCase().includes(lowerQuery) ||
-                    drive.content.toLowerCase().includes(lowerQuery)
+                    extinguisher.name.toLowerCase().includes(lowerQuery) ||
+                    extinguisher.content.toLowerCase().includes(lowerQuery)
                 );
             });
         }
 
-        let sortedAndFilteredDrives = [...filteredDrives];
+        let sortedAndFilteredExtinguishers = [...filteredExtinguishers];
 
         if (sortCriteria === 'name') {
-            sortedAndFilteredDrives.sort((a, b) => a.name.localeCompare(b.name));
+            sortedAndFilteredExtinguishers.sort((a, b) => a.name.localeCompare(b.name));
         } else if (sortCriteria === 'price') {
-            sortedAndFilteredDrives.sort((a, b) => {
+            sortedAndFilteredExtinguishers.sort((a, b) => {
                 const priceA = parseFloat(a.price.replace(/[^0-9.]/g, '')) || 0;
                 const priceB = parseFloat(b.price.replace(/[^0-9.]/g, '')) || 0;
                 return priceA - priceB;
             });
         } else if (sortCriteria === 'view_count') {
-            sortedAndFilteredDrives.sort((a, b) => b.view_count - a.view_count);
+            sortedAndFilteredExtinguishers.sort((a, b) => b.view_count - a.view_count);
         }
 
-
-        const finalDrives = [...sortedAndFilteredDrives].sort((a, b) => {
-            const aIsFavorite = favoriteDriveIds.includes(a.id);
-            const bIsFavorite = favoriteDriveIds.includes(b.id);
+        const finalExtinguishers = [...sortedAndFilteredExtinguishers].sort((a, b) => {
+            const aIsFavorite = favoriteExtinguisherIds.includes(a.id);
+            const bIsFavorite = favoriteExtinguisherIds.includes(b.id);
             if (aIsFavorite && !bIsFavorite) return -1;
             if (!aIsFavorite && bIsFavorite) return 1;
             return 0;
         });
 
-
         return (
-            <div className="variable-drives-grid">
-                {finalDrives.map(drive => (
-                    <div key={drive.id} className="drive-card">
-                        <img src={drive.image} alt={drive.name} className="drive-image" />
-                        <h3>{drive.name}</h3>
-                        <p>Price: {drive.price}</p>
-                        <div className="drive-actions">
-                            <button onClick={() => handleViewDetails(drive.id)}>View Details</button>
+            <div className="fire-extinguishers-grid">
+                {finalExtinguishers.map(extinguisher => (
+                    <div key={extinguisher.id} className="extinguisher-card">
+                        <img src={extinguisher.image} alt={extinguisher.name} className="extinguisher-image" />
+                        <h3>{extinguisher.name}</h3>
+                        <p>Price: {extinguisher.price}</p>
+                        <div className="extinguisher-actions">
+                            <button onClick={() => handleViewDetails(extinguisher.id)}>View Details</button>
                             {isLoggedIn && (
                                 <>
-                                    <button onClick={() => handleEditDrive(drive.id)}>Edit</button>
-                                    <button onClick={() => handleDeleteDrive(drive.id)}>Delete</button>
+                                    <button onClick={() => handleEditExtinguisher(extinguisher.id)}>Edit</button>
+                                    <button onClick={() => handleDeleteExtinguisher(extinguisher.id)}>Delete</button>
                                     <button
-                                        className={`favorite-button ${favoriteDriveIds.includes(drive.id) ? 'favorited' : ''}`}
-                                        onClick={() => handleToggleFavorite(drive.id)}
-                                        aria-label={favoriteDriveIds.includes(drive.id) ? 'Remove from favorites' : 'Add to favorites'}
+                                        className={`favorite-button ${favoriteExtinguisherIds.includes(extinguisher.id) ? 'favorited' : ''}`}
+                                        onClick={() => handleToggleFavorite(extinguisher.id)}
+                                        aria-label={favoriteExtinguisherIds.includes(extinguisher.id) ? 'Remove from favorites' : 'Add to favorites'}
                                     >
-                                        {favoriteDriveIds.includes(drive.id) ? '❤️' : '🤍'}
+                                        {favoriteExtinguisherIds.includes(extinguisher.id) ? '❤️' : '🤍'}
                                     </button>
                                 </>
                             )}
@@ -269,246 +264,209 @@ function VariableDrives() {
         );
     };
 
-    const renderDriveDetails = () => {
-        if (!selectedDriveDetails) return <div>Loading details...</div>;
+    const renderExtinguisherDetails = () => {
+        if (!selectedExtinguisherDetails) return <div>Loading details...</div>;
 
         return (
-            <div className="drive-details-container">
-                <div className="drive-image-container">
-                    <img src={selectedDriveDetails.image} alt={selectedDriveDetails.name} className="drive-details-image" />
+            <div className="extinguisher-details-container">
+                <div className="extinguisher-image-container">
+                    <img src={selectedExtinguisherDetails.image} alt={selectedExtinguisherDetails.name} className="extinguisher-details-image" />
                 </div>
-                <div className="drive-details">
-                    <h2>{selectedDriveDetails.name}</h2>
-                    <p><strong>Content:</strong> {selectedDriveDetails.content}</p>
-                    <p><strong>Price:</strong> {selectedDriveDetails.price}</p>
-                    <p><strong>Misc:</strong> {selectedDriveDetails.misc}</p>
-                    {selectedDriveDetails.specificationDocument && (
-                        <>
-                            <br />
-                            <br />
-                        </>
-                    )}
-                    {selectedDriveDetails.specificationDocument && (
-                        <a href={selectedDriveDetails.specificationDocument} target="_blank" rel="noopener noreferrer">
-                            <button>Download Specification Document</button>
-                        </a>
-                    )}
+                <div className="extinguisher-details">
+                    <h2>{selectedExtinguisherDetails.name}</h2>
+                    <p><strong>Content:</strong> {selectedExtinguisherDetails.content}</p>
+                    <p><strong>Price:</strong> {selectedExtinguisherDetails.price}</p>
+                    <p><strong>Misc:</strong> {selectedExtinguisherDetails.misc}</p>
                     <br/>
                     <br/>
-                    <button onClick={handleBackToGrid}>Back to Variable Drive List</button>
+                    <button onClick={handleBackToGrid}>Back to Fire Extinguisher List</button>
                 </div>
             </div>
         );
     };
 
     const renderEditForm = () => {
-        const driveToEdit = variableDrives.find(drive => drive.id === editingDriveId);
-        if (!driveToEdit) return <div>Loading edit form...</div>;
+        const extinguisherToEdit = fireExtinguishers.find(extinguisher => extinguisher.id === editingExtinguisherId);
+        if (!extinguisherToEdit) return <div>Loading edit form...</div>;
 
-        return <DriveForm
-            initialData={driveToEdit}
-            onSave={handleUpdateDrive}
+        return <ExtinguisherForm
+            initialData={extinguisherToEdit}
+            onSave={handleUpdateExtinguisher}
             onCancel={handleCancelEdit}
             formType="edit"
         />;
     };
 
     const renderNewEntryForm = () => {
-        return <DriveForm
-            onSave={handleCreateDrive}
+        return <ExtinguisherForm
+            onSave={handleCreateExtinguisher}
             onCancel={handleCancelNewEntry}
             formType="new"
         />;
     };
 
-    const handleCreateDrive = async (driveData) => {
-        setIsLoading(true);
+    const handleCreateExtinguisher = async (extinguisherData) => {
+        setIs Loading(true);
         try {
-            const drivesCollection = collection(db, 'variableDrives');
-            await addDoc(drivesCollection, driveData);
-            const querySnapshot = await getDocs(drivesCollection);
-            const drivesList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            setVariableDrives(drivesList);
-
+            const extinguishersCollection = collection(db, 'fireExtinguisher');
+            const newExtinguisherRef = await addDoc(extinguishersCollection, extinguisherData);
+            setFireExtinguishers([...fireExtinguishers, { id: newExtinguisherRef.id, ...extinguisherData }]);
+            setSuccessMessage('Fire Extinguisher created successfully.');
+            setErrorMessage('');
             setIsCreatingNew(false);
-            setSuccessMessage('Variable Drive created successfully.');
-            setErrorMessage('');
             setIsLoading(false);
         } catch (error) {
-            console.error('Error creating variable drive:', error);
-            setErrorMessage('Error creating Variable Drive.');
+            console.error('Error creating fire extinguisher:', error);
+            setErrorMessage('Error creating Fire Extinguisher.');
             setSuccessMessage('');
             setIsLoading(false);
         }
     };
 
-    const handleUpdateDrive = async (id, driveData) => {
+    const handleUpdateExtinguisher = async (extinguisherData) => {
         setIsLoading(true);
         try {
-            const driveDocRef = doc(db, 'variableDrives', id);
-            await updateDoc(driveDocRef, driveData);
-            const querySnapshot = await getDocs(collection(db, 'variableDrives'));
-            const drivesList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            setVariableDrives(drivesList);
-            setIsEditing(false);
-            setEditingDriveId(null);
-            setSuccessMessage('Variable Drive updated successfully.');
+            const extinguisherDocRef = doc(db, 'fireExtinguisher', editingExtinguisherId);
+            await updateDoc(extinguisherDocRef, extinguisherData);
+            const updatedExtinguishers = fireExtinguishers.map(extinguisher => 
+                extinguisher.id === editingExtinguisherId ? { id: extinguisher.id, ...extinguisherData } : extinguisher
+            );
+            setFireExtinguishers(updatedExtinguishers);
+            setSuccessMessage('Fire Extinguisher updated successfully.');
             setErrorMessage('');
+            setIsEditing(false);
+            setEditingExtinguisherId(null);
             setIsLoading(false);
         } catch (error) {
-            console.error('Error updating variable drive:', error);
-            setErrorMessage('Error updating Variable Drive.');
+            console.error('Error updating fire extinguisher:', error);
+            setErrorMessage('Error updating Fire Extinguisher.');
             setSuccessMessage('');
             setIsLoading(false);
         }
     };
-
 
     return (
-        <div className="variable-drives-page">
-            <h1>Variable Drives Page</h1>
-            {isLoggedIn && !isCreatingNew && !isEditing && !selectedDriveId && (
-                <button onClick={handleNewEntryClick} className="new-entry-button">New Entry</button>
-            )}
-
-            <div className="search-filter-options">
-                <input
-                    type="text"
-                    placeholder="Search drives..."
-                    value={searchQuery}
-                    onChange={handleSearchChange}
-                />
-            </div>
-
-            <div className="sorting-options">
-                <label htmlFor="sort">Sort by:</label>
-                <select id="sort" value={sortCriteria} onChange={handleSortChange}>
-                    <option value="name">Name</option>
-                    <option value="price">Price</option>
-                    <option value="view_count">View Count</option>
-                </select>
-            </div>
-
-
+        <div className="fire-safety-page">
+            <h1>Fire Safety Management</h1>
+            {isLoading && <p>Loading...</p>}
             {errorMessage && <p className="error-message">{errorMessage}</p>}
             {successMessage && <p className="success-message">{successMessage}</p>}
-
-            {isLoading ? (
-                <div className="loading-spinner">
-                    <div className="spinner"></div>
-                    <p>Loading Variable Drives...</p>
-                </div>
-            ) : (
-                isCreatingNew ? renderNewEntryForm() :
-                    isEditing ? renderEditForm() :
-                        selectedDriveId ? renderDriveDetails() :
-                            renderDriveGrid()
+            {!isCreatingNew && !isEditing && (
+                <>
+                    <button onClick={handleNewEntryClick}>Add New Fire Extinguisher</button>
+                    <input
+                        type="text"
+                        placeholder="Search..."
+                        value={searchQuery}
+                        onChange={handleSearchChange}
+                    />
+                    <select value={sortCriteria} onChange={handleSortChange}>
+                        <option value="name">Sort by Name</option>
+                        <option value="price">Sort by Price</option>
+                        <option value="view_count">Sort by Views</option>
+                    </select>
+                    {renderExtinguisherGrid()}
+                </>
             )}
-
+            {isEditing && renderEditForm()}
+            {isCreatingNew && renderNewEntryForm()}
+            {selectedExtinguisherId && renderExtinguisherDetails()}
         </div>
     );
 }
 
-
-const DriveForm = ({ initialData, onSave, onCancel, formType }) => {
-    const [name, setName] = useState(initialData?.name || '');
-    const [content, setContent] = useState(initialData?.content || '');
-    const [price, setPrice] = useState(initialData?.price || '');
-    const [image, setImage] = useState(initialData?.image || '');
-    const [misc, setMisc] = useState(initialData?.misc || '');
-    const [specificationDocument, setSpecificationDocument] = useState(initialData?.specificationDocument || '');
-    const [previewImage, setPreviewImage] = useState(initialData?.image || null);
-    const [isImageLoading, setIsImageLoading] = useState(false);
-
-    const handleSubmit = async (event) => {
-        event.preventDefault();
-        if (isImageLoading) {
-            alert("Please wait for the image to finish loading before saving.");
-            return;
-        }
-        const driveData = { name, content, price, image, misc, specificationDocument, view_count: initialData?.view_count || 0 };
-        if (formType === 'edit') {
-            await onSave(initialData.id, driveData);
-        } else {
-            await onSave(driveData);
-        }
-    };
+function ExtinguisherForm({ initialData, onSave, onCancel, formType }) {
+    const [name, setName] = useState(initialData ? initialData.name : '');
+    const [content, setContent] = useState(initialData ? initialData.content : '');
+    const [price, setPrice] = useState(initialData ? initialData.price : '');
+    const [misc, setMisc] = useState(initialData ? initialData.misc : '');
+    const [image, setImage] = useState(null);
+    const [imagePreview, setImagePreview] = useState(initialData ? initialData.image : '');
 
     const handleImageChange = async (event) => {
         const file = event.target.files[0];
-        if (!file) return;
-
-        setIsImageLoading(true);
-
-        try {
-            const compressedFile = await imageCompression(file, {
-                maxSizeMB: 0.1,
-                maxWidthOrHeight: 800,
-                useWebWorker: true,
-            });
-
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                const base64String = reader.result;
-                setImage(base64String);
-                setPreviewImage(base64String);
-                setIsImageLoading(false);
+        if (file) {
+            const options = {
+                maxSizeMB: 1,
+                maxWidthOrHeight: 1920,
             };
-            reader.readAsDataURL(compressedFile);
-        } catch (error) {
-            console.error('Image compression error:', error);
-            setIsImageLoading(false);
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                const base64String = reader.result;
-                setImage(base64String);
-                setPreviewImage(base64String);
-            };
-            reader.readAsDataURL(file);
+            try {
+                const compressedFile = await imageCompression(file, options);
+                setImage(compressedFile);
+                setImagePreview(URL.createObjectURL(compressedFile));
+            } catch (error) {
+                console.error('Error compressing image:', error);
+            }
         }
     };
 
+    const handleSubmit = (event) => {
+        event.preventDefault();
+        const extinguisherData = {
+            name,
+            content,
+            price,
+            misc,
+            image: imagePreview,
+        };
+        onSave(extinguisherData);
+    };
 
     return (
-        <form onSubmit={handleSubmit} className="drive-form">
-            <h2>{formType === 'edit' ? 'Edit Variable Drive' : 'New Variable Drive'}</h2>
+        <form onSubmit={handleSubmit}>
             <div className="form-group">
                 <label htmlFor="name">Name:</label>
-                <input type="text" id="name" value={name} onChange={(e) => setName(e.target.value)} required />
+                <input
+                    type="text"
+                    id="name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+ required
+                />
             </div>
             <div className="form-group">
                 <label htmlFor="content">Content:</label>
-                <textarea id="content" value={content} onChange={(e) => setContent(e.target.value)} />
+                <input
+                    type="text"
+                    id="content"
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    required
+                />
             </div>
             <div className="form-group">
                 <label htmlFor="price">Price:</label>
-                <input type="text" id="price" value={price} onChange={(e) => setPrice(e.target.value)} />
+                <input
+                    type="text"
+                    id="price"
+                    value={price}
+                    onChange={(e) => setPrice(e.target.value)}
+                    required
+                />
+            </div>
+            <div className="form-group">
+                <label htmlFor="misc">Miscellaneous Info:</label>
+                <input
+                    type="text"
+                    id="misc"
+                    value={misc}
+                    onChange={(e) => setMisc(e.target.value)}
+                />
             </div>
             <div className="form-group">
                 <label htmlFor="image">Image:</label>
-                <input type="file" id="image" accept="image/*" onChange={handleImageChange} />
-                {previewImage && <img src={previewImage} alt="Preview" className="image-preview" />}
-            </div>
-            <div className="form-group">
-                <label htmlFor="misc">Misc:</label>
-                <input type="text" id="misc" value={misc} onChange={(e) => setMisc(e.target.value)} />
-            </div>
-            <div className="form-group">
-                <label htmlFor="specificationDocument">Specification Document URL:</label>
                 <input
-                    type="text"
-                    id="specificationDocument"
-                    value={specificationDocument}
-                    onChange={(e) => setSpecificationDocument(e.target.value)}
+                    type="file"
+                    id="image"
+                    accept="image/*"
+                    onChange={handleImageChange}
                 />
+                {imagePreview && <img src={imagePreview} alt="Preview" className="image-preview" />}
             </div>
-            <div className="form-actions">
-                <button type="submit">Save</button>
-                <button type="button" onClick={onCancel}>Cancel</button>
-            </div>
+            <button type="submit">{formType === 'edit' ? 'Update' : 'Create'} Fire Extinguisher</button>
+            <button type="button" onClick={onCancel}>Cancel</button>
         </form>
     );
-};
+}
 
-export default VariableDrives;
-/* eslint-enable react/prop-types */
+export default FireSafety;
