@@ -306,7 +306,7 @@ function FireSafety() {
     };
 
     const handleCreateExtinguisher = async (extinguisherData) => {
-        setIs Loading(true);
+        setIsLoading(true);
         try {
             const extinguishersCollection = collection(db, 'fireExtinguisher');
             const newExtinguisherRef = await addDoc(extinguishersCollection, extinguisherData);
@@ -421,7 +421,7 @@ function ExtinguisherForm({ initialData, onSave, onCancel, formType }) {
                     id="name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
- required
+required
                 />
             </div>
             <div className="form-group">
