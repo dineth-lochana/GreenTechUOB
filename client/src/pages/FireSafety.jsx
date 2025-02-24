@@ -64,7 +64,7 @@ function VariableExtinguishers() {
     }, []);
 
     useEffect(() => {
-        const fetchExtinguishers = async () => {
+        const fetchFireExtinguishers = async () => {
             setIsLoading(true);
             try {
                 const extinguishersCollection = collection(db, 'fireExtinguisher');
@@ -204,7 +204,7 @@ function VariableExtinguishers() {
 
 
     const renderExtinguisherGrid = () => {
-        let filteredExtinguishers = [...fireExtinguisher];
+        let filteredExtinguishers = [...fireExtinguishers];
 
         if (searchQuery) {
             const lowerQuery = searchQuery.toLowerCase();
