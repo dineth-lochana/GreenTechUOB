@@ -26,7 +26,7 @@ function FireSafety() {
             {isLoggedIn ? (
                 <p>Logged in, username is: {userEmail}</p>
             ) : (
-                <p>You are not logged in.</p>
+                <p>You are not logged in. Really?</p>
             )}
         </div>
     );
