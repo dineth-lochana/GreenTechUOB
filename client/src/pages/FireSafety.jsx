@@ -165,6 +165,29 @@ function VariableExtinguishers() {
         setSuccessMessage('');
     };
 
+    const handleShare = async (extinguisherDetails) => {
+    try {
+        const shareData = {
+            title: extinguisherDetails.name,
+            text: `Check out this fire extinguisher: ${extinguisherDetails.name}. Price: ${extinguisherDetails.price}. Details: ${extinguisherDetails.content}. Additional Info: ${extinguisherDetails.misc}`,
+            url: window.location.href, // Current page URL (consider adding routing for direct links)
+        };
+
+        if (navigator.share) {
+            await navigator.share(shareData);
+        } else {
+            // Fallback: Copy text to clipboard
+            await navigator.clipboard.writeText(
+                `${shareData.title}\n${shareData.text}\n${shareData.url}`
+            );
+            alert('Extinguisher details copied to clipboard!');
+        }
+    } catch (error) {
+        console.error('Error sharing:', error);
+        alert('Sharing failed. Please try again.');
+    }
+};
+
     const handleToggleFavorite = async (extinguisherId) => {
         if (!isLoggedIn) {
             alert("Please log in to favorite Extinguisher.");
@@ -289,6 +312,7 @@ function VariableExtinguishers() {
                     <p><strong>Misc:</strong> {selectedExtinguisherDetails.misc}</p>
                     <br/>
                     <br/>
+                    <button onClick={() => handleShare(selectedExtinguisherDetails)}>Share</button>
                     <button onClick={handleBackToGrid}>Back to Fire Extinguisher List</button>
                 </div>
             </div>
