@@ -1,4 +1,4 @@
-/* eslint-disable react/prop-types */
+* eslint-disable react/prop-types */
 import { useState, useEffect } from 'react';
 import './FireSafety.css';
 import { auth, db } from '../firebaseConfig';
@@ -33,7 +33,6 @@ function VariableExtinguishers() {
     const [favoriteExtinguisherIds, setFavoriteExtinguisherIds] = useState([]);
     const [sortCriteria, setSortCriteria] = useState('name');
     const [searchQuery, setSearchQuery] = useState('');
-
 
     useEffect(() => {
         const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
@@ -166,7 +165,6 @@ function VariableExtinguishers() {
         setSuccessMessage('');
     };
 
-
     const handleToggleFavorite = async (extinguisherId) => {
         if (!isLoggedIn) {
             alert("Please log in to favorite Extinguisher.");
@@ -202,7 +200,6 @@ function VariableExtinguishers() {
         setSearchQuery(event.target.value);
     };
 
-
     const renderExtinguisherGrid = () => {
         let filteredExtinguishers = [...fireExtinguishers];
 
@@ -220,26 +217,25 @@ function VariableExtinguishers() {
 
         if (sortCriteria === 'name') {
             sortedAndFilteredExtinguishers.sort((a, b) => a.name.localeCompare(b.name));
-        } else if (sortCriteria === 'price') {
-    sortedAndFilteredExtinguishers.sort((a, b) => {
-        const cleanPrice = (price) => {
-            return parseFloat(
-                price
-                    .replace(/Rs\.?\s*/i, '') // Remove currency symbol
-                    .replace(/,/g, '') // Remove commas
-                    .replace(/[^0-9.]/g, '') // Remove non-numeric except periods
-                    || 0
-            );
-        };
+        } else if (sortCriteria === 'price_asc' || sortCriteria === 'price_desc') {
+            sortedAndFilteredExtinguishers.sort((a, b) => {
+                const cleanPrice = (price) => {
+                    return parseFloat(
+                        price
+                            .replace(/Rs\.?\s*/i, '')
+                            .replace(/,/g, '')
+                            .replace(/[^0-9.]/g, '')
+                            || 0
+                    );
+                };
 
-        const priceA = cleanPrice(a.price);
-        const priceB = cleanPrice(b.price);
-        return priceA - priceB;
-    });
-} else if (sortCriteria === 'view_count') {
+                const priceA = cleanPrice(a.price);
+                const priceB = cleanPrice(b.price);
+                return sortCriteria === 'price_asc' ? priceA - priceB : priceB - priceA;
+            });
+        } else if (sortCriteria === 'view_count') {
             sortedAndFilteredExtinguishers.sort((a, b) => b.view_count - a.view_count);
         }
-
 
         const finalExtinguishers = [...sortedAndFilteredExtinguishers].sort((a, b) => {
             const aIsFavorite = favoriteExtinguisherIds.includes(a.id);
@@ -248,7 +244,6 @@ function VariableExtinguishers() {
             if (!aIsFavorite && bIsFavorite) return 1;
             return 0;
         });
-
 
         return (
             <div className="fire-extinguishers-grid">
@@ -305,7 +300,7 @@ function VariableExtinguishers() {
         if (!extinguisherToEdit) return <div>Loading edit form...</div>;
 
         return <ExtinguisherForm
-            initialData={extinguisherToEdit}
+            initialData={extingu ishersToEdit}
             onSave={handleUpdateExtinguisher}
             onCancel={handleCancelEdit}
             formType="edit"
@@ -362,7 +357,6 @@ function VariableExtinguishers() {
         }
     };
 
-
     return (
         <div className="fire-extinguishers-page">
             <h1>Fire Extinguishers Page</h1>
@@ -383,11 +377,11 @@ function VariableExtinguishers() {
                 <label htmlFor="sort">Sort by:</label>
                 <select id="sort" value={sortCriteria} onChange={handleSortChange}>
                     <option value="name">Name</option>
-                    <option value="price">Price</option>
+                    <option value="price_asc">Price: Low to High</option>
+                    <option value="price_desc">Price: High to Low</option>
                     <option value="view_count">View Count</option>
                 </select>
             </div>
-
 
             {errorMessage && <p className="error-message">{errorMessage}</p>}
             {successMessage && <p className="success-message">{successMessage}</p>}
@@ -403,11 +397,9 @@ function VariableExtinguishers() {
                         selectedExtinguisherId ? renderExtinguisherDetails() :
                             renderExtinguisherGrid()
             )}
-
         </div>
     );
 }
-
 
 const ExtinguisherForm = ({ initialData, onSave, onCancel, formType }) => {
     const [name, setName] = useState(initialData?.name || '');
@@ -465,7 +457,6 @@ const ExtinguisherForm = ({ initialData, onSave, onCancel, formType }) => {
             reader.readAsDataURL(file);
         }
     };
-
 
     return (
         <form onSubmit={handleSubmit} className="extinguisher-form">
