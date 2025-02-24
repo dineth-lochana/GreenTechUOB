@@ -313,6 +313,8 @@ function VariableExtinguishers() {
                     <br/>
                     <br/>
                     <button onClick={() => handleShare(selectedExtinguisherDetails)}>Share</button>
+                    <br/>
+                    <br/>
                     <button onClick={handleBackToGrid}>Back to Fire Extinguisher List</button>
                 </div>
             </div>
