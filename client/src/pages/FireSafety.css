@@ -1,1 +1,233 @@
 
+.fire-extinguishers-page {
+    padding: 20px;
+}
+
+.fire-extinguishers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.extinguisher-card {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 15px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.extinguisher-image {
+    max-width: 100%;
+    height: auto;
+    max-height: 200px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+}
+
+.extinguisher-actions button {
+    margin: 5px;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 4px;
+    background-color: #2d7ead;
+    color: white;
+    cursor: pointer;
+}
+
+.extinguisher-actions button:hover {
+    background-color: #68dd78;
+}
+
+.extinguisher-details-container {
+    display: flex;
+    flex-direction: row;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+.extinguisher-image-container {
+    flex: 1; 
+    padding: 10px;
+}
+
+.extinguisher-details {
+    flex: 1;
+    padding: 10px;
+}
+
+
+.extinguisher-details-image {
+    max-width: 100%; 
+    height: auto;
+    display: block;
+    margin: 0 auto 20px;
+    border-radius: 4px;
+}
+
+@media (max-width: 768px) {
+    .extinguisher-details-container {
+        flex-direction: column;
+    }
+
+    .extinguisher-image-container,
+    .extinguisher-details {
+        flex: none;
+        width: 100%; 
+    }
+
+    .extinguisher-details-image {
+        max-width: 100%; 
+    }
+}
+
+
+.extinguisher-form {
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+}
+
+.extinguisher-form h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.form-group input[type="text"],
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.form-group input[type="file"] {
+    padding: 5px 0;
+}
+
+.image-preview {
+    max-width: 200px;
+    height: auto;
+    margin-top: 10px;
+    border-radius: 4px;
+}
+
+
+.form-actions {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.form-actions button {
+    padding: 10px 20px;
+    margin: 0 10px;
+    border: none;
+    border-radius: 4px;
+    background-color: #2d7ead;
+    color: white;
+    cursor: pointer;
+}
+
+.form-actions button:hover {
+    background-color: #68dd78;
+}
+
+.new-entry-button {
+    margin-bottom: 20px;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    background-color: #3fb358;
+    color: white;
+    cursor: pointer;
+}
+
+.new-entry-button:hover {
+    background-color: #67f18a;
+}
+
+.error-message {
+    color: red;
+    margin-bottom: 10px;
+}
+
+.success-message {
+    color: green;
+    margin-bottom: 10px;
+}
+
+.loading-spinner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 50px; 
+}
+
+.spinner {
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-left-color: #09f;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 10px;
+}
+
+
+
+.search-filter-options, .sorting-options {
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.search-filter-options input[type="text"] {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  flex-grow: 1;
+}
+
+.sorting-options select {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.favorite-button.favorited {
+    color: red;
+}
+
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
