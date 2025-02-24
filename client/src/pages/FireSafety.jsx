@@ -124,7 +124,7 @@ function VariableExtinguishers() {
         try {
             const extinguisherDocRef = doc(db, 'fireExtinguisher', id);
             await deleteDoc(extinguisherDocRef);
-            setFireExtinguishers(fireExtinguisher.filter(extinguisher => extinguisher.id !== id));
+            setFireExtinguishers(fireExtinguishers.filter(extinguisher => extinguisher.id !== id));
             setSuccessMessage('Fire Extinguisher deleted successfully.');
             setErrorMessage('');
             setIsLoading(false);
