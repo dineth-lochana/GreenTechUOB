@@ -1,4 +1,4 @@
-* eslint-disable react/prop-types */
+/* eslint-disable react/prop-types */
 import { useState, useEffect } from 'react';
 import './FireSafety.css';
 import { auth, db } from '../firebaseConfig';
@@ -297,10 +297,10 @@ function VariableExtinguishers() {
 
     const renderEditForm = () => {
         const extinguisherToEdit = fireExtinguishers.find(extinguisher => extinguisher.id === editingExtinguisherId);
-        if (!extinguisherToEdit) return <div>Loading edit form...</div>;
+        if (!extinguisherToEdit) return <div >Loading edit form...</div>;
 
         return <ExtinguisherForm
-            initialData={extingu ishersToEdit}
+            initialData={extinguisherToEdit}
             onSave={handleUpdateExtinguisher}
             onCancel={handleCancelEdit}
             formType="edit"
