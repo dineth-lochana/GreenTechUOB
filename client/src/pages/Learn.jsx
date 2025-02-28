@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-unused-vars
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { auth, db } from '../firebaseConfig';
@@ -13,6 +14,7 @@ const Learn = () => {
   const [generatingAnswer, setGeneratingAnswer] = useState(false);
   const [questions, setQuestions] = useState([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+// eslint-disable-next-line no-unused-vars
   const [userEmail, setUserEmail] = useState(null);
   const [newQuestion, setNewQuestion] = useState("");
   const [editingId, setEditingId] = useState(null);
@@ -50,6 +52,7 @@ const Learn = () => {
         ...doc.data()
       }));
       setQuestions(questionsList);
+      // eslint-disable-next-line no-unused-vars
     } catch (error) {
       Swal.fire({
         icon: 'error',
@@ -85,6 +88,7 @@ const Learn = () => {
         title: 'Success',
         text: 'Question added successfully'
       });
+      // eslint-disable-next-line no-unused-vars
     } catch (error) {
       Swal.fire({
         icon: 'error',
@@ -107,6 +111,7 @@ const Learn = () => {
         title: 'Success',
         text: 'Question updated successfully'
       });
+      // eslint-disable-next-line no-unused-vars
     } catch (error) {
       Swal.fire({
         icon: 'error',
@@ -184,7 +189,7 @@ const Learn = () => {
 
     try {
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.VITE_GEMINI_API_KEY}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${import.meta.env.VITE_GEMINI_API_KEY}`,
         {
           method: "POST",
           headers: {
@@ -217,6 +222,7 @@ const Learn = () => {
 
       const formattedAnswer = formatAnswer(answerData);
       setAnswer(formattedAnswer);
+      // eslint-disable-next-line no-unused-vars
     } catch (error) {
       setAnswer("Sorry - Something went wrong. Please try again!");
     } finally {
