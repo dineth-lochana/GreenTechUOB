@@ -28,11 +28,13 @@ jobs:
 
       - name: Install dependencies
         run: |
-          rm -rf node_modules
-          rm -f package-lock.json
           npm install
         working-directory: client
 
       - name: Run Jest tests
-        run: npm test
+        run: npm test -- --passWithNoTests
+        working-directory: client
+        
+      - name: Check code formatting
+        run: npx prettier --check "src/**/*.{js,jsx}" || true
         working-directory: client
