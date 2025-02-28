@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import Slider from "../components/Slider";
 import Chatbot from '../components/Chatbot';
 import { motion } from "framer-motion";
+import PropTypes from 'prop-types';
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 50 },
@@ -63,8 +64,6 @@ const welcomeTextStyle = {
   letterSpacing: "2px",
 };
 
-
-
 const InfoSection = ({ title, text, imgSrc, imagePosition = 'right' }) => {
   const imageMotion = imagePosition === 'right' ? slideInRight : slideInLeft;
   const textMotion = fadeInUp;
@@ -116,11 +115,16 @@ const InfoSection = ({ title, text, imgSrc, imagePosition = 'right' }) => {
   );
 };
 
+// Add PropTypes validation
+InfoSection.propTypes = {
+  title: PropTypes.string.isRequired,
+  text: PropTypes.string.isRequired,
+  imgSrc: PropTypes.string.isRequired,
+  imagePosition: PropTypes.string,
+};
 
 function Home() {
-
   return (
-    
     <div>
       <Slider />
       <motion.p
@@ -135,7 +139,6 @@ function Home() {
       </motion.p>
 
       <div style={{ padding: "50px" }}>
-
         <InfoSection
           title="Company Profile"
           text="Green Tech Services is providing a comprehensive range of products & services aimed at Building Facility Management..."
@@ -172,9 +175,11 @@ function Home() {
 
         <br />
         <hr style={hrStyle} />
-        
       </div>
-      <Chatbot chatbotId={process.env.VITE_Chatling_API_KEY} />
+      
+      {/* Fixed process.env issue */}
+      <Chatbot chatbotId={import.meta.env.VITE_Chatling_API_KEY} />
+
       <footer />
     </div>
   );
