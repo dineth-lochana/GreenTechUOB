@@ -1,5 +1,6 @@
 // eslint-disable-next-line no-unused-vars
 import React, { useEffect } from 'react';
+import PropTypes from 'prop-types'; // Import PropTypes
 
 const Chatbot = ({ chatbotId }) => {
   useEffect(() => {
@@ -30,6 +31,11 @@ const Chatbot = ({ chatbotId }) => {
   }, [chatbotId]); // Re-run if chatbotId changes
 
   return null; // This component doesn't render anything directly
+};
+
+// Define PropTypes
+Chatbot.propTypes = {
+  chatbotId: PropTypes.string.isRequired // Defines chatbotId as a required string prop
 };
 
 export default Chatbot;

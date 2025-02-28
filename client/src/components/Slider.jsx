@@ -1,5 +1,6 @@
+
 // eslint-disable-next-line no-unused-vars
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import './Slider.css';
 
 const Slider = () => {
@@ -30,7 +31,7 @@ const Slider = () => {
   const carouselRef = useRef(null);
   const [isAnimating, setIsAnimating] = useState(false);
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     if (isAnimating) return;
     setIsAnimating(true);
     carouselRef.current.classList.add('next');
@@ -41,12 +42,12 @@ const Slider = () => {
       newSlides.push(firstSlide);
       return newSlides;
     });
-
+  
     setTimeout(() => {
       carouselRef.current.classList.remove('next');
       setIsAnimating(false);
     }, 500);
-  };
+  }, [isAnimating]);
 
   const handlePrev = () => {
     if (isAnimating) return;
@@ -72,7 +73,7 @@ const Slider = () => {
     }, 7000);
     
     return () => clearInterval(interval);
-  }, [isAnimating]);
+  }, [isAnimating, handleNext]);
 
   return (
     <div className="carousel" ref={carouselRef}>
