@@ -1,12 +1,10 @@
 // jest.config.cjs
-'use strict';
-
 module.exports = {
   roots: ['<rootDir>/src'],
   moduleFileExtensions: ['js', 'jsx', 'json', 'node'],
   setupFilesAfterEnv: [
     '<rootDir>/jest.setup.js',
-    '@testing-library/jest-dom/extend-expect'
+    '@testing-library/jest-dom' // Corrected path
   ],
   moduleNameMapper: {
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
