@@ -22,53 +22,69 @@ const slideInLeft = {
 const sectionContainerStyle = {
   display: "flex",
   flexWrap: "wrap",
-  justifyContent: "center",
+  justifyContent: "space-between",
   alignItems: "center",
   marginTop: "50px",
   padding: "50px",
   borderRadius: "10px",
+  boxSizing: "border-box",
+  width: "100%",
+  overflow: "hidden",
 };
 
 const textSectionStyle = {
   flex: "1",
   minWidth: "300px",
-  textAlign: "center",
+  maxWidth: "50%",
+  textAlign: "center", // Center align text
+  padding: "20px 60px 20px 5px", // Added padding-right: 40px
+  boxSizing: "border-box",
 };
 
 const imageSectionStyle = {
   flex: "1",
   minWidth: "300px",
+  maxWidth: "50%",
   textAlign: "center",
+  padding: "20px 60px 20px 5px", // Added padding-right: 40px
+  boxSizing: "border-box",
 };
 
 const sectionHeadingStyle = {
   marginBottom: "20px",
   fontWeight: "1000",
   fontSize: "25px",
+  textAlign: "center", // Center align title
 };
 
 const sectionTextStyle = {
   fontSize: "20px",
+  lineHeight: "1.5",
+  textAlign: "center", // Center align text
 };
 
 const hrStyle = {
   borderTop: "3px solid #73f573",
+  margin: "30px 0",
 };
 
 const welcomeTextStyle = {
   textAlign: "center",
   paddingTop: "100px",
-  fontSize: "50px",
+  fontSize: "clamp(30px, 6vw, 50px)",
   fontWeight: "1000",
   color: "#1e8f1e",
   textShadow: "1px 1px 3px rgba(0,0,0,0.5)",
   letterSpacing: "2px",
+  margin: "0 20px",
 };
 
 const InfoSection = ({ title, text, imgSrc, imagePosition = 'right' }) => {
   const imageMotion = imagePosition === 'right' ? slideInRight : slideInLeft;
   const textMotion = fadeInUp;
-  const backgroundGradient = imagePosition === 'right' ? "linear-gradient(135deg, #1e8f1e,rgba(115, 245, 115, 0.25))" : "linear-gradient(135deg,rgba(115, 245, 115, 0.25), #1e8f1e)";
+  const backgroundGradient = imagePosition === 'right' 
+    ? "linear-gradient(135deg, #1e8f1e,rgba(115, 245, 115, 0.25))" 
+    : "linear-gradient(135deg,rgba(115, 245, 115, 0.25), #1e8f1e)";
 
   return (
     <div style={{ ...sectionContainerStyle, background: backgroundGradient }}>
@@ -83,10 +99,16 @@ const InfoSection = ({ title, text, imgSrc, imagePosition = 'right' }) => {
           <img
             src={imgSrc}
             alt={title}
-            style={{ maxWidth: "100%", height: "auto" }}
+            style={{ 
+              maxWidth: "100%", 
+              height: "auto",
+              maxHeight: "400px",
+              objectFit: "contain"
+            }}
           />
         </motion.div>
       )}
+
       <motion.div
         style={textSectionStyle}
         initial="hidden"
@@ -97,6 +119,7 @@ const InfoSection = ({ title, text, imgSrc, imagePosition = 'right' }) => {
         <h4 style={sectionHeadingStyle}>{title}</h4>
         <p style={sectionTextStyle}>{text}</p>
       </motion.div>
+
       {imagePosition === 'right' && (
         <motion.div
           style={imageSectionStyle}
@@ -108,7 +131,12 @@ const InfoSection = ({ title, text, imgSrc, imagePosition = 'right' }) => {
           <img
             src={imgSrc}
             alt={title}
-            style={{ maxWidth: "100%", height: "auto" }}
+            style={{ 
+              maxWidth: "100%", 
+              height: "auto",
+              maxHeight: "400px",
+              objectFit: "contain"
+            }}
           />
         </motion.div>
       )}
@@ -116,7 +144,6 @@ const InfoSection = ({ title, text, imgSrc, imagePosition = 'right' }) => {
   );
 };
 
-// Add PropTypes validation
 InfoSection.propTypes = {
   title: PropTypes.string.isRequired,
   text: PropTypes.string.isRequired,
@@ -126,7 +153,7 @@ InfoSection.propTypes = {
 
 function Home() {
   return (
-    <div>
+    <div style={{ overflowX: "hidden" }}>
       <Slider />
       <motion.p
         initial="hidden"
@@ -139,13 +166,12 @@ function Home() {
         Welcome to Green Tech Services
       </motion.p>
 
-      <div style={{ padding: "50px" }}>
+      <div style={{ padding: "20px" }}>
         <InfoSection
           title="Company Profile"
           text="Green Tech Services is providing a comprehensive range of products & services aimed at Building Facility Management..."
           imgSrc="./images/nana.gif"
         />
-        <br />
         <hr style={hrStyle} />
 
         <InfoSection
@@ -154,8 +180,6 @@ function Home() {
           imgSrc="./images/6.png"
           imagePosition="left"
         />
-
-        <br />
         <hr style={hrStyle} />
 
         <InfoSection
@@ -163,8 +187,6 @@ function Home() {
           text="Well experienced in carrying out assignments, our personnel, as individuals, have also developed experience in a significant diversity and range of project sizes and types..."
           imgSrc="./images/3.png"
         />
-
-        <br />
         <hr style={hrStyle} />
 
         <InfoSection
@@ -173,14 +195,9 @@ function Home() {
           imgSrc="./images/fin.gif"
           imagePosition="left"
         />
-
-        <br />
-        <hr style={hrStyle} />
       </div>
       
-      {/* Fixed process.env issue */}
       <Chatbot chatbotId={import.meta.env.VITE_Chatling_API_KEY} />
-
       <footer />
     </div>
   );
