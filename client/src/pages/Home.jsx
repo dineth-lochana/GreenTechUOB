@@ -36,8 +36,8 @@ const textSectionStyle = {
   flex: "1",
   minWidth: "300px",
   maxWidth: "50%",
-  textAlign: "center", // Center align text
-  padding: "20px 60px 20px 5px", // Added padding-right: 40px
+  textAlign: "center", 
+  padding: "20px 90px 20px 1px", // Added padding-right: 40px
   boxSizing: "border-box",
 };
 
@@ -46,7 +46,7 @@ const imageSectionStyle = {
   minWidth: "300px",
   maxWidth: "50%",
   textAlign: "center",
-  padding: "20px 60px 20px 5px", // Added padding-right: 40px
+  padding: "20px 90px 20px 1px", // Added padding-right: 40px
   boxSizing: "border-box",
 };
 
@@ -54,13 +54,13 @@ const sectionHeadingStyle = {
   marginBottom: "20px",
   fontWeight: "1000",
   fontSize: "25px",
-  textAlign: "center", // Center align title
+  textAlign: "center", 
 };
 
 const sectionTextStyle = {
   fontSize: "20px",
   lineHeight: "1.5",
-  textAlign: "center", // Center align text
+  textAlign: "center", 
 };
 
 const hrStyle = {
