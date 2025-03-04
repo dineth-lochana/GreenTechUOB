@@ -86,7 +86,7 @@ jobs:
             rm -rf node_modules
             rm -f package-lock.json
           fi
-          npm ci
+          npm install
 
       - name: Install and build client
         working-directory: client
