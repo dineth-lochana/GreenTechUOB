@@ -1,8 +1,7 @@
-name: CI and Deploy
-
+name: CI and Deploy 
 on:
   push:
-    branches:
+    branches: 
       - master
   pull_request:
     branches:
@@ -24,6 +23,7 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+
     strategy:
       matrix:
         node-version: [23.x]
@@ -36,92 +36,30 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'npm'
-          cache-dependency-path: 'client/package-lock.json'
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
-      - name: Create optimized vite config
-        working-directory: client
-        run: |
-          cat > vite.config.js << 'EOF'
-          import { defineConfig } from 'vite';
-          import react from '@vitejs/plugin-react';
-
-          export default defineConfig({
-            base: '/GreenTechUOB/',
-            plugins: [react()],
-            build: {
-              rollupOptions: {
-                output: {
-                  manualChunks: {
-                    'vendor-react': ['react', 'react-dom'],
-                    'vendor-router': ['react-router-dom'],
-                  },
-                  chunkFileNames: 'assets/js/[name]-[hash].js',
-                  entryFileNames: 'assets/js/[name]-[hash].js',
-                  assetFileNames: 'assets/[ext]/[name]-[hash].[ext]',
-                },
-              },
-              chunkSizeWarningLimit: 1000,
-              minify: 'terser',
-              terserOptions: {
-                compress: {
-                  drop_console: true,
-                  drop_debugger: true,
-                },
-              },
-              sourcemap: true,
-            },
-            optimizeDeps: {
-              include: ['react', 'react-dom'],
-            },
-          });
-          EOF
-
+      # Clean install dependencies
       - name: Clean install dependencies
-        working-directory: client
         run: |
-          if [ ! -d "node_modules" ] || [ ! -f "package-lock.json" ]; then
-            rm -rf node_modules
-            rm -f package-lock.json
-          fi
+          rm -rf node_modules
+          rm -f package-lock.json
           npm install
-          npm add -D terser
+        working-directory: client
 
-
+      # Install and build the client
       - name: Install and build client
         working-directory: client
         env:
           VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
           VITE_GEMINI_API_KEY: ${{ secrets.VITE_GEMINI_API_KEY }}
           VITE_Chatling_API_KEY: ${{ secrets.VITE_Chatling_API_KEY }}
-          NODE_ENV: production
         run: |
-          # Apply additional build optimizations
-          export VITE_BUILD_COMPRESS=true
-          export VITE_BUILD_SOURCEMAP=true
-          export VITE_BUILD_DROP_CONSOLE=true
-          
-          # Run the optimized build
-          npm run build -- --mode production \
-            --outDir dist \
-            --emptyOutDir \
-            --minify terser \
-            --ssrManifest \
-            --sourcemap
+          npm install
+          npm run build
 
-      - name: Analyze build output
-        working-directory: client
-        run: |
-          echo "=== Build Output Analysis ==="
-          ls -lh dist/assets/
-          echo "=== JavaScript Bundle Sizes ==="
-          find dist/assets -name "*.js" -exec du -h {} \;
-          echo "=== CSS Bundle Sizes ==="
-          find dist/assets -name "*.css" -exec du -h {} \;
-
+      # Upload and deploy
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
@@ -130,11 +68,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-
-      - name: Output build statistics
-        if: always()
-        working-directory: client
-        run: |
-          echo "=== Build Complete ==="
-          echo "Total build size: $(du -sh dist | cut -f1)"
-          echo "Number of chunks: $(find dist/assets -name "*.js" | wc -l)"
