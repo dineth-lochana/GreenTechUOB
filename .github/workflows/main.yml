@@ -50,7 +50,7 @@ jobs:
           import react from '@vitejs/plugin-react';
 
           export default defineConfig({
-            base: '/GreenTechUOB/'
+            base: '/GreenTechUOB/',
             plugins: [react()],
             build: {
               rollupOptions: {
