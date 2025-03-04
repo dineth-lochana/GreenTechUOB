@@ -87,6 +87,8 @@ jobs:
             rm -f package-lock.json
           fi
           npm install
+          npm add -D terser
+
 
       - name: Install and build client
         working-directory: client
