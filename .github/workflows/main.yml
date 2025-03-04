@@ -106,7 +106,6 @@ jobs:
             --outDir dist \
             --emptyOutDir \
             --minify terser \
-            --modulePreload \
             --ssrManifest \
             --sourcemap
 
