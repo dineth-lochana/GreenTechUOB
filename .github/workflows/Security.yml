@@ -8,10 +8,33 @@ on:
 
 permissions:
   security-events: write
-  contents: write    # Added to allow committing changes to README
+  contents: write   
+  actions: read    
 
 jobs:
+  code-ql-analysis:
+    name: CodeQL Analysis
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript 
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        id: codeql-analysis
+
   security-scan:
+    needs: code-ql-analysis
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -19,6 +42,7 @@ jobs:
 
       - name: Semgrep Code Scan
         uses: semgrep/semgrep-action@v1
+        id: semgrep-scan
         with:
           config: >- 
             p/security-audit 
@@ -29,7 +53,7 @@ jobs:
 
       - name: OWASP Dependency-Check
         uses: dependency-check/Dependency-Check_Action@main
-        id: Depcheck
+        id: dependency-check
         with:
           project: 'GreenTech'
           path: '.'
@@ -39,6 +63,7 @@ jobs:
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
+        id: trivy-scan
         with:
           scan-type: 'fs'
           ignore-unfixed: true
@@ -47,32 +72,35 @@ jobs:
           severity: 'CRITICAL,HIGH'
         continue-on-error: true
 
-      - name: Upload security scan results
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: 'trivy-results.sarif'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      # Improved security report generation
       - name: Generate Security Report
         run: |
-          echo "## Security Report" > security-report.md
+          echo "## Security Scan Report 🛡️" > security-report.md
           echo "Last Updated: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> security-report.md
           echo "" >> security-report.md
           
+          # Semgrep Results
           echo "### Semgrep Findings" >> security-report.md
+          if [ "${{ steps.semgrep-scan.outcome }}" == "success" ]; then
+            echo "✅ Semgrep Scan Passed" >> security-report.md
+          else
+            echo "❌ Semgrep Scan Failed" >> security-report.md
+          fi
           echo "\`\`\`" >> security-report.md
-          # Use the Semgrep GitHub Action output instead of running semgrep directly
           if [ -f "semgrep.json" ]; then
-            jq -r '.results[] | "- " + .extra.message' semgrep.json >> security-report.md || echo "No Semgrep findings" >> security-report.md
+            jq -r '.results[] | "- " + .extra.message' semgrep.json >> security-report.md || echo "No detailed Semgrep findings" >> security-report.md
           else
             echo "No Semgrep results found" >> security-report.md
           fi
           echo "\`\`\`" >> security-report.md
           echo "" >> security-report.md
           
+          # Dependency Check Results
           echo "### OWASP Dependency Check" >> security-report.md
+          if [ "${{ steps.dependency-check.outcome }}" == "success" ]; then
+            echo "✅ Dependency Scan Passed" >> security-report.md
+          else
+            echo "❌ Dependency Scan Failed" >> security-report.md
+          fi
           echo "\`\`\`" >> security-report.md
           if [ -f "reports/dependency-check-report.html" ]; then
             grep -A 5 "Found [0-9]* vulnerabilities" reports/dependency-check-report.html | sed 's/<[^>]*>//g' >> security-report.md
@@ -82,7 +110,13 @@ jobs:
           echo "\`\`\`" >> security-report.md
           echo "" >> security-report.md
           
-          echo "### Trivy Scan Results" >> security-report.md
+          # Trivy Scan Results
+          echo "### Trivy Vulnerability Scan" >> security-report.md
+          if [ "${{ steps.trivy-scan.outcome }}" == "success" ]; then
+            echo "✅ Trivy Scan Passed" >> security-report.md
+          else
+            echo "❌ Trivy Scan Failed" >> security-report.md
+          fi
           echo "\`\`\`" >> security-report.md
           if [ -f "trivy-results.sarif" ]; then
             jq -r '.runs[].results[] | "- " + .message.text' trivy-results.sarif >> security-report.md || echo "No vulnerabilities found" >> security-report.md
@@ -90,12 +124,20 @@ jobs:
             echo "No vulnerabilities found" >> security-report.md
           fi
           echo "\`\`\`" >> security-report.md
+          
+          # CodeQL Results
+          echo "### CodeQL Analysis" >> security-report.md
+          if [ "${{ needs.code-ql-analysis.result }}" == "success" ]; then
+            echo "✅ CodeQL Analysis Passed" >> security-report.md
+          else
+            echo "❌ CodeQL Analysis Failed" >> security-report.md
+          fi
 
       - name: Update README
         run: |
           if [ -f "README.md" ]; then
             # Remove existing security report section if it exists
-            sed -i '/## Security Report/,$d' README.md
+            sed -i '/## Security Scan Report/,$d' README.md
             # Append new security report
             cat security-report.md >> README.md
           else
@@ -107,7 +149,7 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add README.md
-          git commit -m "Update security report" || echo "No changes to commit"
+          git commit -m "Update security scan report" || echo "No changes to commit"
           git push
 
   npm-audit:
