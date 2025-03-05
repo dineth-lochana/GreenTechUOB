@@ -8,8 +8,8 @@ on:
 
 permissions:
   security-events: write
-  contents: write   
-  actions: read    
+  contents: write  
+  actions: read     
 
 jobs:
   code-ql-analysis:
