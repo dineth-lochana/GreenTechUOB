@@ -12,29 +12,7 @@ permissions:
   actions: read     
 
 jobs:
-  code-ql-analysis:
-    name: CodeQL Analysis
-    runs-on: ubuntu-latest
-    permissions:
-      security-events: write
-      actions: read
-      contents: read
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
-        with:
-          languages: javascript 
-
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
-        id: codeql-analysis
-
   security-scan:
-    needs: code-ql-analysis
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -70,6 +48,17 @@ jobs:
           format: 'sarif'
           output: 'trivy-results.sarif'
           severity: 'CRITICAL,HIGH'
+        continue-on-error: true
+
+      - name: Fetch CodeQL Analysis Results
+        uses: octokit/request-action@v2.x
+        id: get-codeql-status
+        with:
+          route: GET /repos/{owner}/{repo}/code-scanning/analyses
+          owner: ${{ github.repository_owner }}
+          repo: ${{ github.event.repository.name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         continue-on-error: true
 
       - name: Generate Security Report
@@ -125,12 +114,15 @@ jobs:
           fi
           echo "\`\`\`" >> security-report.md
           
-          # CodeQL Results
+          # CodeQL Results from existing analysis
           echo "### CodeQL Analysis" >> security-report.md
-          if [ "${{ needs.code-ql-analysis.result }}" == "success" ]; then
-            echo "✅ CodeQL Analysis Passed" >> security-report.md
+          if [ "${{ steps.get-codeql-status.outcome }}" == "success" ]; then
+            echo "✅ CodeQL Analysis Results Retrieved" >> security-report.md
+            echo "\`\`\`" >> security-report.md
+            echo "Latest CodeQL analysis results are available in the Security tab" >> security-report.md
+            echo "\`\`\`" >> security-report.md
           else
-            echo "❌ CodeQL Analysis Failed" >> security-report.md
+            echo "❌ Unable to fetch CodeQL results" >> security-report.md
           fi
 
       - name: Update README
