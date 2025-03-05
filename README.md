@@ -1,7 +1,7 @@
 # GreenTechUOB CS01
 
 ## Group Members
-| Member | UOB Number | Role |
+| Member | UOB Number | Role | 
 |----------|----------|----------|
 | Dineth Mallawarachchi | 2424617 | Project Manager |
 | Shehan Sangeeth | 2425073 | Risk Manager |
