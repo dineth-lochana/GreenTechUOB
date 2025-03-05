@@ -8,6 +8,7 @@ on:
 
 permissions:
   security-events: write
+  contents: write    
 
 jobs:
   security-scan:
@@ -49,6 +50,56 @@ jobs:
           sarif_file: 'trivy-results.sarif'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate Security Report
+        run: |
+          echo "## Security Report" > security-report.md
+          echo "Last Updated: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> security-report.md
+          echo "" >> security-report.md
+          
+          echo "### Semgrep Findings" >> security-report.md
+          echo "\`\`\`" >> security-report.md
+          semgrep --json | jq -r '.results[] | "- " + .extra.message' >> security-report.md || echo "No Semgrep findings" >> security-report.md
+          echo "\`\`\`" >> security-report.md
+          echo "" >> security-report.md
+          
+          echo "### OWASP Dependency Check" >> security-report.md
+          echo "\`\`\`" >> security-report.md
+          if [ -f "reports/dependency-check-report.html" ]; then
+            grep -A 5 "Found [0-9]* vulnerabilities" reports/dependency-check-report.html | sed 's/<[^>]*>//g' >> security-report.md
+          else
+            echo "No dependencies scanned" >> security-report.md
+          fi
+          echo "\`\`\`" >> security-report.md
+          echo "" >> security-report.md
+          
+          echo "### Trivy Scan Results" >> security-report.md
+          echo "\`\`\`" >> security-report.md
+          if [ -f "trivy-results.sarif" ]; then
+            jq -r '.runs[].results[] | "- " + .message.text' trivy-results.sarif >> security-report.md || echo "No vulnerabilities found" >> security-report.md
+          else
+            echo "No vulnerabilities found" >> security-report.md
+          fi
+          echo "\`\`\`" >> security-report.md
+
+      - name: Update README
+        run: |
+          if [ -f "README.md" ]; then
+            # Remove existing security report section if it exists
+            sed -i '/## Security Report/,$d' README.md
+            # Append new security report
+            cat security-report.md >> README.md
+          else
+            cp security-report.md README.md
+          fi
+
+      - name: Commit changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add README.md
+          git commit -m "Update security report" || echo "No changes to commit"
+          git push
 
   npm-audit:
     runs-on: ubuntu-latest
