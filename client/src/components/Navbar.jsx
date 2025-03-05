@@ -58,13 +58,7 @@ function Navbar() {
                             </li>
                         </>
                     ) : (
-                        <>
-                        {/* <li><a href="./#/loginRegister">Login</a></li> */} 
-                        {/* Removed Public Login Button to Comply with Client Requests */}          
-                        </>
-                        <>
-                        <li><a href="./#/loginRegister">Login</a></li>
-                        </>
+                        <li><a href="./#/loginRegister">Login</a></li>        
                     )}
                 </ul>
             </div>
