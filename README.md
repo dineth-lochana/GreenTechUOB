@@ -32,3 +32,17 @@
    ![image](https://github.com/user-attachments/assets/6f7f8276-f27c-47b9-b8c4-8a9607e0ddf3)
 3. Check that your feature works in the build as well (Python server is localhost:8000)
 4. Success! The Production Build is working!
+## Security Report
+Last Updated: 2025-03-05 05:40:23 UTC
+
+### Semgrep Findings
+```
+```
+
+### OWASP Dependency Check
+```
+```
+
+### Trivy Scan Results
+```
+```
