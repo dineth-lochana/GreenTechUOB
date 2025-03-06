@@ -1,0 +1,25 @@
+name: Google Lighthouse Performance Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Run Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v10
+        with:
+          urls: "https://dineth-lochana.github.io/GreenTechUOB/#/"  
+          budgetPath: "./lighthouse-budget.json"  
+          uploadArtifacts: true
+          temporaryPublicStorage: true
