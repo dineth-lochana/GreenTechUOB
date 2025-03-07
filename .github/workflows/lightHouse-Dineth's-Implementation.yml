@@ -20,7 +20,7 @@ jobs:
         with:
           urls: |
             https://dineth-lochana.github.io/GreenTechUOB/#/variableDrives
-          uploadArtifacts: true
+          uploadArtifacts: false
           temporaryPublicStorage: true
       - name: Generate Lighthouse Report
         run: |
