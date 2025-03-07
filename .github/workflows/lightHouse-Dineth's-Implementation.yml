@@ -23,69 +23,131 @@ jobs:
       - name: Install dependencies
         run: |
           npm install -g @lhci/cli@0.13.x
+          npm install lighthouse chrome-launcher
 
-      - name: Run Lighthouse tests
+      - name: Run Lighthouse tests and save results
         run: |
-          mkdir -p lighthouse-results
-          
-          lhci collect --url=https://dineth-lochana.github.io/GreenTechUOB/#/ --output=json --outputPath=./lighthouse-results/home.json
-          lhci collect --url=https://dineth-lochana.github.io/GreenTechUOB/#/Learn --output=json --outputPath=./lighthouse-results/learn.json
-          lhci collect --url=https://dineth-lochana.github.io/GreenTechUOB/#/fireSafety --output=json --outputPath=./lighthouse-results/fire-safety.json
-          lhci collect --url=https://dineth-lochana.github.io/GreenTechUOB/#/variableDrives --output=json --outputPath=./lighthouse-results/variable-drives.json
+          # Create Node script to run Lighthouse and save results
+          cat << 'EOF' > run-lighthouse.js
+          const lighthouse = require('lighthouse');
+          const chromeLauncher = require('chrome-launcher');
+          const fs = require('fs');
+          const path = require('path');
 
-      - name: Process Lighthouse Results and Update README
+          const urls = [
+            { url: 'https://dineth-lochana.github.io/GreenTechUOB/#/', name: 'home' },
+            { url: 'https://dineth-lochana.github.io/GreenTechUOB/#/Learn', name: 'learn' },
+            { url: 'https://dineth-lochana.github.io/GreenTechUOB/#/fireSafety', name: 'fire-safety' },
+            { url: 'https://dineth-lochana.github.io/GreenTechUOB/#/variableDrives', name: 'variable-drives' }
+          ];
+
+          async function runLighthouse(url, outputPath) {
+            const chrome = await chromeLauncher.launch({ chromeFlags: ['--headless'] });
+            const options = { 
+              logLevel: 'info',
+              output: 'json',
+              port: chrome.port,
+              onlyCategories: ['performance', 'accessibility', 'best-practices', 'seo']
+            };
+
+            try {
+              const results = await lighthouse(url, options);
+              fs.writeFileSync(outputPath, JSON.stringify(results.lhr));
+              console.log(`Lighthouse scores for ${url}:`, {
+                performance: results.lhr.categories.performance.score * 100,
+                accessibility: results.lhr.categories.accessibility.score * 100,
+                'best-practices': results.lhr.categories['best-practices'].score * 100,
+                seo: results.lhr.categories.seo.score * 100
+              });
+            } catch (error) {
+              console.error(`Error running Lighthouse for ${url}:`, error);
+            } finally {
+              await chrome.kill();
+            }
+          }
+
+          async function main() {
+            const resultsDir = './lighthouse-results';
+            if (!fs.existsSync(resultsDir)){
+              fs.mkdirSync(resultsDir);
+            }
+
+            for (const { url, name } of urls) {
+              console.log(`Running Lighthouse for ${url}`);
+              await runLighthouse(url, path.join(resultsDir, `${name}.json`));
+            }
+          }
+
+          main().catch(console.error);
+          EOF
+
+          node run-lighthouse.js
+
+      - name: Process Results and Update README
         run: |
-          cat << 'EOF' > process-lighthouse.js
+          cat << 'EOF' > process-results.js
           const fs = require('fs');
           
           function readLighthouseResults(filePath) {
+            try {
               const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-              const categories = data[0].lhr.categories;
+              const categories = data.categories;
               return {
-                  performance: Math.round(categories.performance.score * 100),
-                  accessibility: Math.round(categories.accessibility.score * 100),
-                  'best-practices': Math.round(categories['best-practices'].score * 100),
-                  seo: Math.round(categories.seo.score * 100)
+                performance: Math.round(categories.performance.score * 100),
+                accessibility: Math.round(categories.accessibility.score * 100),
+                'best-practices': Math.round(categories['best-practices'].score * 100),
+                seo: Math.round(categories.seo.score * 100)
               };
+            } catch (error) {
+              console.error(`Error reading ${filePath}:`, error);
+              return null;
+            }
           }
           
           function generateMarkdownTable(results) {
-              const timestamp = new Date().toISOString().split('T')[0];
-              let markdown = '## Dineth LightHouse Test\n\n';
-              markdown += `Last updated: ${timestamp}\n\n`;
-              markdown += '| Page | Performance | Accessibility | Best Practices | SEO |\n';
-              markdown += '|------|-------------|---------------|----------------|-----|\n';
-          
-              for (const [page, scores] of Object.entries(results)) {
-                  markdown += `| ${page} | ${scores.performance} | ${scores.accessibility} | ${scores['best-practices']} | ${scores.seo} |\n`;
+            const timestamp = new Date().toISOString().split('T')[0];
+            let markdown = '## Dineth LightHouse Test\n\n';
+            markdown += `Last updated: ${timestamp}\n\n`;
+            markdown += '| Page | Performance | Accessibility | Best Practices | SEO |\n';
+            markdown += '|------|-------------|---------------|----------------|-----|\n';
+            
+            for (const [page, scores] of Object.entries(results)) {
+              if (scores) {
+                markdown += `| ${page} | ${scores.performance} | ${scores.accessibility} | ${scores['best-practices']} | ${scores.seo} |\n`;
               }
-              
-              return markdown;
+            }
+            
+            return markdown;
           }
           
-          const results = {
+          try {
+            const results = {
               'Home': readLighthouseResults('./lighthouse-results/home.json'),
               'Learn': readLighthouseResults('./lighthouse-results/learn.json'),
               'Fire Safety': readLighthouseResults('./lighthouse-results/fire-safety.json'),
               'Variable Drives': readLighthouseResults('./lighthouse-results/variable-drives.json')
-          };
-          
-          const lighthouseSection = generateMarkdownTable(results);
-          
-          let readme = fs.readFileSync('README.md', 'utf8');
-          
-          const lighthouseRegex = /## Dineth LightHouse Test[\s\S]*?(?=##|$)/;
-          
-          if (lighthouseRegex.test(readme)) {
+            };
+            
+            const lighthouseSection = generateMarkdownTable(results);
+            
+            let readme = fs.readFileSync('README.md', 'utf8');
+            const lighthouseRegex = /## Dineth LightHouse Test[\s\S]*?(?=##|$)/;
+            
+            if (lighthouseRegex.test(readme)) {
               readme = readme.replace(lighthouseRegex, lighthouseSection);
-          } else {
+            } else {
               readme += '\n\n' + lighthouseSection;
+            }
+            
+            fs.writeFileSync('README.md', readme);
+            console.log('README.md updated successfully');
+          } catch (error) {
+            console.error('Error updating README:', error);
+            process.exit(1);
           }
-          
-          fs.writeFileSync('README.md', readme);
           EOF
           
-          node process-lighthouse.js
+          node process-results.js
 
       - name: Commit and Push Changes
         run: |
