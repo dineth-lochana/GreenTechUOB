@@ -8,6 +8,9 @@ on:
     branches:
       - main
 
+permissions:
+  contents: write
+
 jobs:
   lighthouse:
     runs-on: ubuntu-latest
@@ -16,45 +19,47 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Run Lighthouse CI
+      - name: Run Lighthouse CI for Multiple Pages
         uses: treosh/lighthouse-ci-action@v10
         with:
-          urls: "https://dineth-lochana.github.io/GreenTechUOB/#/"
+          urls: |
+            https://dineth-lochana.github.io/GreenTechUOB/#/
+            https://dineth-lochana.github.io/GreenTechUOB/#/Learn
+            https://dineth-lochana.github.io/GreenTechUOB/#/fireSafety
+            https://dineth-lochana.github.io/GreenTechUOB/#/variableDrives
           uploadArtifacts: true
           temporaryPublicStorage: true
 
-      - name: Move Report to Client Folder
+      - name: Generate Lighthouse Report
         run: |
-          mkdir -p client/lighthouse-reports
-          mv .lighthouseci/lhr-*.html client/lighthouse-reports/lighthouse-report.html
+          echo "## Lighthouse Performance Report 🚀" > lighthouse-report.md
+          echo "Last Updated: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> lighthouse-report.md
+          echo "" >> lighthouse-report.md
+          
+          # Add Links to Reports
+          echo "### Page Performance Scores" >> lighthouse-report.md
+          echo "- 🔗 [Homepage Report](https://dineth-lochana.github.io/GreenTechUOB/#/)" >> lighthouse-report.md
+          echo "- 🔗 [learn Report](https://dineth-lochana.github.io/GreenTechUOB/#/Learn/)" >> lighthouse-report.md
+          echo "- 🔗 [fireSafety Page Report](https://dineth-lochana.github.io/GreenTechUOB/#/fireSafety)" >> lighthouse-report.md
+          echo "- 🔗 [variableDrives Page Report](https://dineth-lochana.github.io/GreenTechUOB/#/variableDrives)" >> lighthouse-report.md
+          
+          echo "\`\`\`" >> lighthouse-report.md
+          echo "Performance, Accessibility, SEO, and Best Practices scores are available in detailed reports." >> lighthouse-report.md
+          echo "\`\`\`" >> lighthouse-report.md
 
-      - name: Commit and Push Report
+      - name: Update README with Lighthouse Report
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add client/lighthouse-reports/lighthouse-report.html
-          git commit -m "📊 Update Lighthouse Report"
-          git push
-        continue-on-error: true
-
-      - name: Update README with Latest Report Link
-        run: |
-          REPORT_URL="https://github.com/${{ github.repository }}/blob/main/client/lighthouse-reports/lighthouse-report.html"
-          TIMESTAMP=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
-
-          echo "## 📊 Latest Performance Report" > lighthouse-report.md
-          echo "🚀 **Last Updated:** $TIMESTAMP" >> lighthouse-report.md
-          echo "[📄 View Full Report]($REPORT_URL)" >> lighthouse-report.md
-
-          if grep -q "## 📊 Latest Performance Report" README.md; then
-            sed -i '/## 📊 Latest Performance Report/,$d' README.md
+          if [ -f "README.md" ]; then
+            sed -i '/## Lighthouse Performance Report/,$d' README.md
+            cat lighthouse-report.md >> README.md
+          else
+            cp lighthouse-report.md README.md
           fi
-          cat lighthouse-report.md >> README.md
 
-      - name: Commit and Push Updated README
+      - name: Commit and Push Changes
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add README.md
-          git commit -m "📊 Update Lighthouse Report Link - $TIMESTAMP" || echo "No changes to commit"
+          git commit -m "Update Lighthouse performance report" || echo "No changes to commit"
           git push
