@@ -1,0 +1,80 @@
+name: Lighthouse Test
+
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  lighthouse-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install -g lighthouse
+
+      - name: Run Lighthouse tests
+        id: lighthouse
+        run: |
+          echo "LIGHTHOUSE_RESULTS<<EOF" >> $GITHUB_ENV
+          echo "## Dineth Lighthouse Test" >> $GITHUB_ENV
+          echo "" >> $GITHUB_ENV
+          echo "Last updated by @${{ github.actor }} on $(date +'%Y-%m-%d %H:%M:%S') UTC" >> $GITHUB_ENV
+          echo "" >> $GITHUB_ENV
+          echo "| Page | Performance | Accessibility | Best Practices | SEO |" >> $GITHUB_ENV
+          echo "|------|-------------|---------------|----------------|-----|" >> $GITHUB_ENV
+          
+          URLS=(
+            "https://dineth-lochana.github.io/GreenTechUOB/#/"
+            "https://dineth-lochana.github.io/GreenTechUOB/#/Learn"
+            "https://dineth-lochana.github.io/GreenTechUOB/#/fireSafety"
+            "https://dineth-lochana.github.io/GreenTechUOB/#/variableDrives"
+          )
+          
+          for URL in "${URLS[@]}"; do
+            PAGE_NAME=$(echo $URL | sed 's/.*#\///' | sed 's/$//' || echo "Home")
+            if [ "$PAGE_NAME" == "" ]; then
+              PAGE_NAME="Home"
+            fi
+            
+            lighthouse "$URL" \
+              --chrome-flags="--headless --no-sandbox" \
+              --output json --output-path /tmp/lighthouse.json \
+              --quiet
+            
+            PERFORMANCE=$(cat /tmp/lighthouse.json | jq '.categories.performance.score * 100' | xargs printf "%.0f")
+            ACCESSIBILITY=$(cat /tmp/lighthouse.json | jq '.categories.accessibility.score * 100' | xargs printf "%.0f")
+            BEST_PRACTICES=$(cat /tmp/lighthouse.json | jq '.categories["best-practices"].score * 100' | xargs printf "%.0f")
+            SEO=$(cat /tmp/lighthouse.json | jq '.categories.seo.score * 100' | xargs printf "%.0f")
+            
+            echo "| $PAGE_NAME | $PERFORMANCE | $ACCESSIBILITY | $BEST_PRACTICES | $SEO |" >> $GITHUB_ENV
+          done
+          
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Update README
+        run: |
+          if [ -f README.md ]; then
+            sed -i '/## Dineth Lighthouse Test/,/## /{ /## /!d; }' README.md
+            sed -i '${/^## $/d}' README.md
+            echo "$LIGHTHOUSE_RESULTS" >> README.md
+          else
+            echo "$LIGHTHOUSE_RESULTS" > README.md
+          fi
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add README.md
+          git commit -m "Update Lighthouse scores [skip ci]" || echo "No changes to commit"
+          git push
