@@ -1,98 +1,58 @@
-name: Lighthouse Testing Dineth
-
+name: Google Lighthouse Performance Test
 on:
   push:
     branches:
-      - master
-  workflow_dispatch:
-
+      - main
+  pull_request:
+    branches:
+      - main
+permissions:
+  contents: write
 jobs:
-  lighthouse-test:
+  lighthouse:
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Run Lighthouse CI for Multiple Pages
+        uses: treosh/lighthouse-ci-action@v10
         with:
-          fetch-depth: 1
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install dependencies
+          urls: |
+            https://dineth-lochana.github.io/GreenTechUOB/#/variableDrives
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+      - name: Generate Lighthouse Report
         run: |
-          npm install -g @lhci/cli@0.13.x
-
-      - name: Run Lighthouse tests
+          echo "## Dineth Lighthouse test" > lighthouse-report.md
+          echo "Last Updated: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> lighthouse-report.md
+          echo "" >> lighthouse-report.md
+          
+          echo "### Page Performance Scores" >> lighthouse-report.md
+          echo "- 🔗 [Homepage Report](https://dineth-lochana.github.io/GreenTechUOB/#/)" >> lighthouse-report.md
+          echo "- 🔗 [learn Report](https://dineth-lochana.github.io/GreenTechUOB/#/Learn/)" >> lighthouse-report.md
+          echo "- 🔗 [fireSafety Page Report](https://dineth-lochana.github.io/GreenTechUOB/#/fireSafety)" >> lighthouse-report.md
+          echo "- 🔗 [variableDrives Page Report](https://dineth-lochana.github.io/GreenTechUOB/#/variableDrives)" >> lighthouse-report.md
+          
+          echo "\`\`\`" >> lighthouse-report.md
+          echo "Performance, Accessibility, SEO, and Best Practices scores are available in detailed reports." >> lighthouse-report.md
+          echo "\`\`\`" >> lighthouse-report.md
+      - name: Update README with Lighthouse Report
         run: |
-          mkdir -p lighthouse-results
-
-          #lhci collect --url=https://dineth-lochana.github.io/GreenTechUOB/#/ --output=json --outputPath=$GITHUB_WORKSPACE/lighthouse-results/home.json
-          #lhci collect --url=https://dineth-lochana.github.io/GreenTechUOB/#/Learn --output=json --outputPath=$GITHUB_WORKSPACE/lighthouse-results/learn.json
-          #lhci collect --url=https://dineth-lochana.github.io/GreenTechUOB/#/fireSafety --output=json --outputPath=$GITHUB_WORKSPACE/lighthouse-results/fire-safety.json
-          lhci collect --url=https://dineth-lochana.github.io/GreenTechUOB/#/variableDrives --output=json --outputPath=$GITHUB_WORKSPACE/lighthouse-results/variable-drives.json
-
-      - name: Process Lighthouse Results and Update README
-        run: |
-          ls -l lighthouse-results
-          cat << 'EOF' > process-lighthouse.js
-          const fs = require('fs');
-
-          function readLighthouseResults(filePath) {
-              const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-              const categories = data[0].lhr.categories;
-              return {
-                  performance: Math.round(categories.performance.score * 100),
-                  accessibility: Math.round(categories.accessibility.score * 100),
-                  'best-practices': Math.round(categories['best-practices'].score * 100),
-                  seo: Math.round(categories.seo.score * 100)
-              };
-          }
-
-          function generateMarkdownTable(results) {
-              const timestamp = new Date().toISOString().split('T')[0];
-              let markdown = '## Dineth LightHouse Test\n\n';
-              markdown += `Last updated: ${timestamp}\n\n`;
-              markdown += '| Page | Performance | Accessibility | Best Practices | SEO |\n';
-              markdown += '|------|-------------|---------------|----------------|-----|\n';
-
-              for (const [page, scores] of Object.entries(results)) {
-                  markdown += `| ${page} | ${scores.performance} | ${scores.accessibility} | ${scores['best-practices']} | ${scores.seo} |\n`;
-              }
-
-              return markdown;
-          }
-
-          const results = {
-              'Home': readLighthouseResults('$GITHUB_WORKSPACE/lighthouse-results/home.json'),
-              'Learn': readLighthouseResults('$GITHUB_WORKSPACE/lighthouse-results/learn.json'),
-              'Fire Safety': readLighthouseResults('$GITHUB_WORKSPACE/lighthouse-results/fire-safety.json'),
-              'Variable Drives': readLighthouseResults('$GITHUB_WORKSPACE/lighthouse-results/variable-drives.json')
-          };
-
-          const lighthouseSection = generateMarkdownTable(results);
-
-          let readme = fs.readFileSync('README.md', 'utf8');
-
-          const lighthouseRegex = /## Dineth LightHouse Test[\s\S]*?(?=##|$)/;
-
-          if (lighthouseRegex.test(readme)) {
-              readme = readme.replace(lighthouseRegex, lighthouseSection);
-          } else {
-              readme += '\n\n' + lighthouseSection;
-          }
-
-          fs.writeFileSync('README.md', readme);
-          EOF
-
-          # Run the processing script
-          node process-lighthouse.js
-
+          if [ -f "README.md" ]; then
+            if grep -q "## Dineth Lighthouse test" README.md; then
+              sed -i '/## Dineth Lighthouse test/,/## /{ /## Dineth Lighthouse test/!{ /## /!d; }; }' README.md
+              sed -i '/## Dineth Lighthouse test/r lighthouse-report.md' README.md
+              sed -i '/## Dineth Lighthouse test/d' README.md
+            else
+              cat lighthouse-report.md >> README.md
+            fi
+          else
+            cp lighthouse-report.md README.md
+          fi
       - name: Commit and Push Changes
         run: |
-          git config --global user.name 'GitHub Actions'
-          git config --global user.email 'actions@github.com'
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
           git add README.md
-          git commit -m "docs: update Lighthouse scores [skip ci]" || exit 0
+          git commit -m "Update Lighthouse performance report" || echo "No changes to commit"
           git push
