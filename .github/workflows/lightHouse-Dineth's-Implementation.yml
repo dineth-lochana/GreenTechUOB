@@ -26,10 +26,7 @@ jobs:
         with:
           urls: |
             https://dineth-lochana.github.io/GreenTechUOB/#/variableDrives
-            https://dineth-lochana.github.io/GreenTechUOB/#/Learn/
-            https://dineth-lochana.github.io/GreenTechUOB/#/fireSafety
-            https://dineth-lochana.github.io/GreenTechUOB/#/
-          uploadArtifacts: true # Important: Keep artifacts to access reports
+          uploadArtifacts: true 
           temporaryPublicStorage: true
 
       - name: Generate Lighthouse Report with Scores
