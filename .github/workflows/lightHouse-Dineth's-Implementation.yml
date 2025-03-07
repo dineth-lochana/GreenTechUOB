@@ -1,5 +1,4 @@
 name: Google Lighthouse Performance Test Dineth
-
 on:
   push:
     branches:
@@ -15,6 +14,13 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  
+      
+      - name: Pull Latest Changes
+        run: |
+          git pull origin master --rebase  # Using rebase since merge commits aren't allowed
+      
       - name: Run Lighthouse CI for Multiple Pages
         uses: treosh/lighthouse-ci-action@v10
         with:
@@ -22,6 +28,7 @@ jobs:
             https://dineth-lochana.github.io/GreenTechUOB/#/variableDrives
           uploadArtifacts: false
           temporaryPublicStorage: true
+      
       - name: Generate Lighthouse Report
         run: |
           echo "## Dineth Lighthouse test" > lighthouse-report.md
@@ -37,6 +44,11 @@ jobs:
           echo "\`\`\`" >> lighthouse-report.md
           echo "Performance, Accessibility, SEO, and Best Practices scores are available in detailed reports." >> lighthouse-report.md
           echo "\`\`\`" >> lighthouse-report.md
+      
+      - name: Pull Latest Changes Again Before README Update
+        run: |
+          git pull origin master --rebase  # Pull again before updating README
+      
       - name: Update README with Lighthouse Report
         run: |
           if [ -f "README.md" ]; then
@@ -50,10 +62,12 @@ jobs:
           else
             cp lighthouse-report.md README.md
           fi
+      
       - name: Commit and Push Changes
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add README.md
           git commit -m "Update Lighthouse performance report" || echo "No changes to commit"
+          git pull origin master --rebase  # Pull one more time before pushing to ensure we have latest changes
           git push
