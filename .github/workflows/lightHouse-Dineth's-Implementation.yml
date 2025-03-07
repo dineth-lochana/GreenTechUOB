@@ -1,8 +1,9 @@
-name: Lighthouse Test
+name: Lighthouse Testing and README Update
 
 on:
   push:
-    branches: [ master ]
+    branches:
+      - master
   workflow_dispatch:
 
 jobs:
@@ -12,7 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 1
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -20,61 +21,76 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        run: npm install -g lighthouse
+        run: |
+          npm install -g @lhci/cli@0.13.x
 
       - name: Run Lighthouse tests
-        id: lighthouse
         run: |
-          echo "LIGHTHOUSE_RESULTS<<EOF" >> $GITHUB_ENV
-          echo "## Dineth Lighthouse Test" >> $GITHUB_ENV
-          echo "" >> $GITHUB_ENV
-          echo "Last updated by @${{ github.actor }} on $(date +'%Y-%m-%d %H:%M:%S') UTC" >> $GITHUB_ENV
-          echo "" >> $GITHUB_ENV
-          echo "| Page | Performance | Accessibility | Best Practices | SEO |" >> $GITHUB_ENV
-          echo "|------|-------------|---------------|----------------|-----|" >> $GITHUB_ENV
+          mkdir -p lighthouse-results
           
-          URLS=(
-            "https://dineth-lochana.github.io/GreenTechUOB/#/"
-            "https://dineth-lochana.github.io/GreenTechUOB/#/Learn"
-            "https://dineth-lochana.github.io/GreenTechUOB/#/fireSafety"
-            "https://dineth-lochana.github.io/GreenTechUOB/#/variableDrives"
-          )
-          
-          for URL in "${URLS[@]}"; do
-            PAGE_NAME=$(echo $URL | sed 's/.*#\///' | sed 's/$//' || echo "Home")
-            if [ "$PAGE_NAME" == "" ]; then
-              PAGE_NAME="Home"
-            fi
-            
-            lighthouse "$URL" \
-              --chrome-flags="--headless --no-sandbox" \
-              --output json --output-path /tmp/lighthouse.json \
-              --quiet
-            
-            PERFORMANCE=$(cat /tmp/lighthouse.json | jq '.categories.performance.score * 100' | xargs printf "%.0f")
-            ACCESSIBILITY=$(cat /tmp/lighthouse.json | jq '.categories.accessibility.score * 100' | xargs printf "%.0f")
-            BEST_PRACTICES=$(cat /tmp/lighthouse.json | jq '.categories["best-practices"].score * 100' | xargs printf "%.0f")
-            SEO=$(cat /tmp/lighthouse.json | jq '.categories.seo.score * 100' | xargs printf "%.0f")
-            
-            echo "| $PAGE_NAME | $PERFORMANCE | $ACCESSIBILITY | $BEST_PRACTICES | $SEO |" >> $GITHUB_ENV
-          done
-          
-          echo "EOF" >> $GITHUB_ENV
+          lhci collect --url=https://dineth-lochana.github.io/GreenTechUOB/#/ --output=json --outputPath=./lighthouse-results/home.json
+          lhci collect --url=https://dineth-lochana.github.io/GreenTechUOB/#/Learn --output=json --outputPath=./lighthouse-results/learn.json
+          lhci collect --url=https://dineth-lochana.github.io/GreenTechUOB/#/fireSafety --output=json --outputPath=./lighthouse-results/fire-safety.json
+          lhci collect --url=https://dineth-lochana.github.io/GreenTechUOB/#/variableDrives --output=json --outputPath=./lighthouse-results/variable-drives.json
 
-      - name: Update README
+      - name: Process Lighthouse Results and Update README
         run: |
-          if [ -f README.md ]; then
-            sed -i '/## Dineth Lighthouse Test/,/## /{ /## /!d; }' README.md
-            sed -i '${/^## $/d}' README.md
-            echo "$LIGHTHOUSE_RESULTS" >> README.md
-          else
-            echo "$LIGHTHOUSE_RESULTS" > README.md
-          fi
+          cat << 'EOF' > process-lighthouse.js
+          const fs = require('fs');
+          
+          function readLighthouseResults(filePath) {
+              const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+              const categories = data[0].lhr.categories;
+              return {
+                  performance: Math.round(categories.performance.score * 100),
+                  accessibility: Math.round(categories.accessibility.score * 100),
+                  'best-practices': Math.round(categories['best-practices'].score * 100),
+                  seo: Math.round(categories.seo.score * 100)
+              };
+          }
+          
+          function generateMarkdownTable(results) {
+              const timestamp = new Date().toISOString().split('T')[0];
+              let markdown = '## Dineth LightHouse Test\n\n';
+              markdown += `Last updated: ${timestamp}\n\n`;
+              markdown += '| Page | Performance | Accessibility | Best Practices | SEO |\n';
+              markdown += '|------|-------------|---------------|----------------|-----|\n';
+          
+              for (const [page, scores] of Object.entries(results)) {
+                  markdown += `| ${page} | ${scores.performance} | ${scores.accessibility} | ${scores['best-practices']} | ${scores.seo} |\n`;
+              }
+              
+              return markdown;
+          }
+          
+          const results = {
+              'Home': readLighthouseResults('./lighthouse-results/home.json'),
+              'Learn': readLighthouseResults('./lighthouse-results/learn.json'),
+              'Fire Safety': readLighthouseResults('./lighthouse-results/fire-safety.json'),
+              'Variable Drives': readLighthouseResults('./lighthouse-results/variable-drives.json')
+          };
+          
+          const lighthouseSection = generateMarkdownTable(results);
+          
+          let readme = fs.readFileSync('README.md', 'utf8');
+          
+          const lighthouseRegex = /## Dineth LightHouse Test[\s\S]*?(?=##|$)/;
+          
+          if (lighthouseRegex.test(readme)) {
+              readme = readme.replace(lighthouseRegex, lighthouseSection);
+          } else {
+              readme += '\n\n' + lighthouseSection;
+          }
+          
+          fs.writeFileSync('README.md', readme);
+          EOF
+          
+          node process-lighthouse.js
 
-      - name: Commit and push changes
+      - name: Commit and Push Changes
         run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'actions@github.com'
           git add README.md
-          git commit -m "Update Lighthouse scores [skip ci]" || echo "No changes to commit"
+          git commit -m "docs: update Lighthouse scores [skip ci]" || exit 0
           git push
