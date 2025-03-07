@@ -34,7 +34,7 @@
 4. Success! The Production Build is working!
 
 ## Security Scan Report 🛡️
-Last Updated: 2025-03-07 11:51:36 UTC
+Last Updated: 2025-03-07 11:57:46 UTC
 
 ### Semgrep Findings
 ✅ Semgrep Scan Passed
@@ -55,15 +55,4 @@ No Semgrep results found
 ✅ CodeQL Analysis Results Retrieved
 ```
 Latest CodeQL analysis results are available in the Security tab
-```
-## Dineth Lighthouse test
-Last Updated: 2025-03-07 11:52:11 UTC
-
-### Page Performance Scores
-- 🔗 [Homepage Report](https://dineth-lochana.github.io/GreenTechUOB/#/)
-- 🔗 [learn Report](https://dineth-lochana.github.io/GreenTechUOB/#/Learn/)
-- 🔗 [fireSafety Page Report](https://dineth-lochana.github.io/GreenTechUOB/#/fireSafety)
-- 🔗 [variableDrives Page Report](https://dineth-lochana.github.io/GreenTechUOB/#/variableDrives)
-```
-Performance, Accessibility, SEO, and Best Practices scores are available in detailed reports.
 ```
