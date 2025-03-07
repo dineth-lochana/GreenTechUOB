@@ -37,9 +37,9 @@
 Last Updated: 2025-03-07 07:05:13 UTC
 
 ## Lighthouse Performance Report 🚀
-Last Updated: dineth-lochana.github.io_2025-03-07_12-20-50.report.html
-              dineth-lochana.github.io_2025-03-07_12-28-19.report.html
-              dineth-lochana.github.io_2025-03-07_12-30-28.report.html
+Last Updated: dineth-lochana.github.io_2025-03-07_12-20-50.report.html<br>
+              dineth-lochana.github.io_2025-03-07_12-28-19.report.html<br>
+              dineth-lochana.github.io_2025-03-07_12-30-28.report.html<br>
 
 ### Semgrep Findings
 ✅ Semgrep Scan Passed
