@@ -15,40 +15,72 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  
-      
+          fetch-depth: 0
+
       - name: Pull Latest Changes
-        run: |
-          git pull origin master --rebase  # Using rebase since merge commits aren't allowed
-      
+        run: git pull origin master --rebase
+
       - name: Run Lighthouse CI for Multiple Pages
+        id: lighthouse-ci
         uses: treosh/lighthouse-ci-action@v10
         with:
           urls: |
             https://dineth-lochana.github.io/GreenTechUOB/#/variableDrives
-          uploadArtifacts: false
+            https://dineth-lochana.github.io/GreenTechUOB/#/Learn/
+            https://dineth-lochana.github.io/GreenTechUOB/#/fireSafety
+            https://dineth-lochana.github.io/GreenTechUOB/#/
+          uploadArtifacts: true # Important: Keep artifacts to access reports
           temporaryPublicStorage: true
-      
-      - name: Generate Lighthouse Report
+
+      - name: Generate Lighthouse Report with Scores
         run: |
           echo "## Dineth Lighthouse test" > lighthouse-report.md
           echo "Last Updated: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> lighthouse-report.md
           echo "" >> lighthouse-report.md
-          
           echo "### Page Performance Scores" >> lighthouse-report.md
-          echo "- 🔗 [Homepage Report](https://dineth-lochana.github.io/GreenTechUOB/#/)" >> lighthouse-report.md
-          echo "- 🔗 [learn Report](https://dineth-lochana.github.io/GreenTechUOB/#/Learn/)" >> lighthouse-report.md
-          echo "- 🔗 [fireSafety Page Report](https://dineth-lochana.github.io/GreenTechUOB/#/fireSafety)" >> lighthouse-report.md
-          echo "- 🔗 [variableDrives Page Report](https://dineth-lochana.github.io/GreenTechUOB/#/variableDrives)" >> lighthouse-report.md
-          
-          echo "\`\`\`" >> lighthouse-report.md
-          echo "Performance, Accessibility, SEO, and Best Practices scores are available in detailed reports." >> lighthouse-report.md
-          echo "\`\`\`" >> lighthouse-report.md
-      
+
+          URLS=(
+            "https://dineth-lochana.github.io/GreenTechUOB/#/variableDrives"
+          )
+
+          extract_score() {
+            jq ".categories.\"$1\".score * 100 | round" lighthouse-report.json
+          }
+
+          for url in "${URLS[@]}"; do
+            page_name=$(echo "$url" | sed 's|https://dineth-lochana.github.io/GreenTechUOB/#/||' | sed 's|/||g' | sed 's|#||g' || echo "Homepage")
+            artifact_name="lighthousereport-${page_name}.json"
+
+            if [ -f "$artifact_name" ]; then
+              echo "- **${page_name}:**" >> lighthouse-report.md
+              performance_score=$(extract_score performance)
+              accessibility_score=$(extract_score accessibility)
+              best_practices_score=$(extract_score 'best-practices')
+              seo_score=$(extract_score seo)
+
+              echo "  - Performance: ${performance_score}" >> lighthouse-report.md
+              echo "  - Accessibility: ${accessibility_score}" >> lighthouse-report.md
+              echo "  - Best Practices: ${best_practices_score}" >> lighthouse-report.md
+              echo "  - SEO: ${seo_score}" >> lighthouse-report.md
+              echo "  - [Detailed Report](https://dineth-lochana.github.io/GreenTechUOB/#${page_name})" >> lighthouse-report.md # Link to your page
+
+              echo "" >> lighthouse-report.md
+            else
+              echo "Warning: Report artifact '$artifact_name' not found for '$url'"
+              echo "- **${page_name}:** Report generation failed." >> lighthouse-report.md
+              echo "" >> lighthouse-report.md
+            fi
+          done
+
+      - name: Download Lighthouse Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: lighthousereport-*.json
+          path: .
+
       - name: Pull Latest Changes Again Before README Update
-        run: |
-          git pull origin master --rebase  # Pull again before updating README
-      
+        run: git pull origin master --rebase
+
       - name: Update README with Lighthouse Report
         run: |
           if [ -f "README.md" ]; then
@@ -62,12 +94,12 @@ jobs:
           else
             cp lighthouse-report.md README.md
           fi
-      
+
       - name: Commit and Push Changes
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add README.md
           git commit -m "Update Lighthouse performance report" || echo "No changes to commit"
-          git pull origin master --rebase  # Pull one more time before pushing to ensure we have latest changes
+          git pull origin master --rebase
           git push
