@@ -1,4 +1,5 @@
 name: Lighthouse Testing Dineth
+
 on:
   push:
     branches:
@@ -8,7 +9,7 @@ on:
 jobs:
   lighthouse-test:
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -26,34 +27,21 @@ jobs:
       - name: Run Lighthouse tests
         run: |
           mkdir -p lighthouse-results
-          
-          lhci collect \
-            --url=https://dineth-lochana.github.io/GreenTechUOB/#/ \
-            --url=https://dineth-lochana.github.io/GreenTechUOB/#/Learn \
-            --url=https://dineth-lochana.github.io/GreenTechUOB/#/fireSafety \
-            --url=https://dineth-lochana.github.io/GreenTechUOB/#/variableDrives \
-            --outputDir=./lighthouse-results
+
+          #lhci collect --url=https://dineth-lochana.github.io/GreenTechUOB/#/ --output=json --outputPath=$GITHUB_WORKSPACE/lighthouse-results/home.json
+          #lhci collect --url=https://dineth-lochana.github.io/GreenTechUOB/#/Learn --output=json --outputPath=$GITHUB_WORKSPACE/lighthouse-results/learn.json
+          #lhci collect --url=https://dineth-lochana.github.io/GreenTechUOB/#/fireSafety --output=json --outputPath=$GITHUB_WORKSPACE/lighthouse-results/fire-safety.json
+          lhci collect --url=https://dineth-lochana.github.io/GreenTechUOB/#/variableDrives --output=json --outputPath=$GITHUB_WORKSPACE/lighthouse-results/variable-drives.json
 
       - name: Process Lighthouse Results and Update README
         run: |
+          ls -l lighthouse-results
           cat << 'EOF' > process-lighthouse.js
           const fs = require('fs');
-          const path = require('path');
 
-          function readLighthouseResults(directoryPath, urlPath) {
-              const files = fs.readdirSync(directoryPath);
-              const resultFile = files.find(file => {
-                  if (!file.endsWith('.json')) return false;
-                  const content = JSON.parse(fs.readFileSync(path.join(directoryPath, file), 'utf8'));
-                  return content.requestedUrl.includes(urlPath);
-              });
-
-              if (!resultFile) {
-                  throw new Error(`No result file found for URL path: ${urlPath}`);
-              }
-
-              const data = JSON.parse(fs.readFileSync(path.join(directoryPath, resultFile), 'utf8'));
-              const categories = data.categories;
+          function readLighthouseResults(filePath) {
+              const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+              const categories = data[0].lhr.categories;
               return {
                   performance: Math.round(categories.performance.score * 100),
                   accessibility: Math.round(categories.accessibility.score * 100),
@@ -68,38 +56,37 @@ jobs:
               markdown += `Last updated: ${timestamp}\n\n`;
               markdown += '| Page | Performance | Accessibility | Best Practices | SEO |\n';
               markdown += '|------|-------------|---------------|----------------|-----|\n';
-          
+
               for (const [page, scores] of Object.entries(results)) {
                   markdown += `| ${page} | ${scores.performance} | ${scores.accessibility} | ${scores['best-practices']} | ${scores.seo} |\n`;
               }
-              
+
               return markdown;
           }
 
-          const RESULTS_DIR = './lighthouse-results';
-          
           const results = {
-              'Home': readLighthouseResults(RESULTS_DIR, '/#/'),
-              'Learn': readLighthouseResults(RESULTS_DIR, '/#/Learn'),
-              'Fire Safety': readLighthouseResults(RESULTS_DIR, '/#/fireSafety'),
-              'Variable Drives': readLighthouseResults(RESULTS_DIR, '/#/variableDrives')
+              'Home': readLighthouseResults('$GITHUB_WORKSPACE/lighthouse-results/home.json'),
+              'Learn': readLighthouseResults('$GITHUB_WORKSPACE/lighthouse-results/learn.json'),
+              'Fire Safety': readLighthouseResults('$GITHUB_WORKSPACE/lighthouse-results/fire-safety.json'),
+              'Variable Drives': readLighthouseResults('$GITHUB_WORKSPACE/lighthouse-results/variable-drives.json')
           };
-          
+
           const lighthouseSection = generateMarkdownTable(results);
-          
+
           let readme = fs.readFileSync('README.md', 'utf8');
-          
+
           const lighthouseRegex = /## Dineth LightHouse Test[\s\S]*?(?=##|$)/;
-          
+
           if (lighthouseRegex.test(readme)) {
               readme = readme.replace(lighthouseRegex, lighthouseSection);
           } else {
               readme += '\n\n' + lighthouseSection;
           }
-          
+
           fs.writeFileSync('README.md', readme);
           EOF
-          
+
+          # Run the processing script
           node process-lighthouse.js
 
       - name: Commit and Push Changes
