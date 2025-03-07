@@ -35,7 +35,9 @@ function ProjectShowcase() {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    const [isPaused, setIsPaused] = useState(false); // For pause-on-hover
 
+    // Fetch user authentication state
     useEffect(() => {
         const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
             if (user) {
@@ -64,6 +66,7 @@ function ProjectShowcase() {
         return () => unsubscribeAuth();
     }, []);
 
+    // Fetch projects from Firebase
     useEffect(() => {
         const fetchProjects = async () => {
             setIsLoading(true);
@@ -82,6 +85,20 @@ function ProjectShowcase() {
         fetchProjects();
     }, []);
 
+    // Automatic slideshow logic
+    useEffect(() => {
+        if (!selectedProjectDetails || !selectedProjectDetails.images || isPaused) return;
+
+        const interval = setInterval(() => {
+            setCurrentImageIndex((prevIndex) =>
+                (prevIndex + 1) % selectedProjectDetails.images.length
+            );
+        }, 5000); // Change image every 5 seconds
+
+        return () => clearInterval(interval); // Cleanup interval on unmount
+    }, [selectedProjectDetails, isPaused]);
+
+    // Handle viewing project details
     const handleViewDetails = async (id) => {
         setSelectedProjectId(id);
         setSelectedProjectDetails(null);
@@ -109,50 +126,20 @@ function ProjectShowcase() {
         }
     };
 
-    const handleBackToGrid = () => {
-        setSelectedProjectId(null);
-        setIsEditing(false);
-        setIsCreatingNew(false);
-        setErrorMessage('');
-        setSuccessMessage('');
+    // Handle manual navigation for the image slider
+    const handleNextImage = () => {
+        setCurrentImageIndex((prevIndex) =>
+            (prevIndex + 1) % selectedProjectDetails.images.length
+        );
     };
 
-    const handleDeleteProject = async (id) => {
-        if (!window.confirm('Are you sure you want to delete this Project?')) {
-            return;
-        }
-        setIsLoading(true);
-        try {
-            const projectDocRef = doc(db, 'projects', id);
-            await deleteDoc(projectDocRef);
-            setProjects(projects.filter(project => project.id !== id));
-            setSuccessMessage('Project deleted successfully.');
-            setErrorMessage('');
-            setIsLoading(false);
-        } catch (error) {
-            console.error('Error deleting Project:', error);
-            setErrorMessage('Error deleting Project.');
-            setSuccessMessage('');
-            setIsLoading(false);
-        }
+    const handlePrevImage = () => {
+        setCurrentImageIndex((prevIndex) =>
+            (prevIndex - 1 + selectedProjectDetails.images.length) % selectedProjectDetails.images.length
+        );
     };
 
-    const handleEditProject = (id) => {
-        setEditingProjectId(id);
-        setIsEditing(true);
-        setSelectedProjectId(null);
-        setIsCreatingNew(false);
-        setErrorMessage('');
-        setSuccessMessage('');
-    };
-
-    const handleCancelEdit = () => {
-        setIsEditing(false);
-        setEditingProjectId(null);
-        setErrorMessage('');
-        setSuccessMessage('');
-    };
-
+    // Handle new entry click
     const handleNewEntryClick = () => {
         setIsCreatingNew(true);
         setSelectedProjectId(null);
@@ -161,94 +148,70 @@ function ProjectShowcase() {
         setSuccessMessage('');
     };
 
-    const handleCancelNewEntry = () => {
+    // Handle back to grid
+    const handleBackToGrid = () => {
+        setSelectedProjectId(null);
+        setIsEditing(false);
         setIsCreatingNew(false);
         setErrorMessage('');
         setSuccessMessage('');
     };
 
-    const handleShare = async (projectDetails) => {
-        try {
-            const shareData = {
-                title: projectDetails.name,
-                text: `Check out this project: ${projectDetails.name}. Capacity: ${projectDetails.capacity}. Details: ${projectDetails.content}. Additional Info: ${projectDetails.misc}`,
-                url: window.location.href,
-            };
+    // Render project details with the image slider
+    const renderProjectDetails = () => {
+        if (!selectedProjectDetails) return <div>Loading details...</div>;
 
-            if (navigator.share) {
-                await navigator.share(shareData);
-            } else {
-                await navigator.clipboard.writeText(
-                    `${shareData.title}\n${shareData.text}\n${shareData.url}`
-                );
-                alert('Project details copied to clipboard!');
-            }
-        } catch (error) {
-            console.error('Error sharing:', error);
-            alert('Sharing failed. Please try again.');
-        }
-    };
-
-    const handleToggleFavorite = async (projectId) => {
-        if (!isLoggedIn) {
-            alert("Please log in to favorite Project.");
-            return;
-        }
-
-        const favoritesDocRef = doc(db, 'userFavorites', userEmail);
-        const isFavorite = favoriteProjectIds.includes(projectId);
-
-        try {
-            if (isFavorite) {
-                await updateDoc(favoritesDocRef, {
-                    projectIds: arrayRemove(projectId)
-                });
-                setFavoriteProjectIds(favoriteProjectIds.filter(id => id !== projectId));
-            } else {
-                await updateDoc(favoritesDocRef, {
-                    projectIds: arrayUnion(projectId)
-                });
-                setFavoriteProjectIds([...favoriteProjectIds, projectId]);
-            }
-        } catch (error) {
-            console.error("Error toggling favorite:", error);
-            setErrorMessage('Error updating favorites.');
-        }
-    };
-
-    const handleSortChange = (event) => {
-        setSortCriteria(event.target.value);
-    };
-
-    const handleSearchChange = (event) => {
-        setSearchQuery(event.target.value);
-    };
-
-    const handleCategoryChange = (event) => {
-        setSelectedCategory(event.target.value);
-    };
-
-    const handleNextImage = () => {
-        setCurrentImageIndex((prevIndex) => 
-            (prevIndex + 1) % selectedProjectDetails.images.length
+        return (
+            <div className="project-details-container">
+                <div
+                    className="image-slider"
+                    onMouseEnter={() => setIsPaused(true)} // Pause on hover
+                    onMouseLeave={() => setIsPaused(false)} // Resume on mouse leave
+                >
+                    <button className="slider-button prev" onClick={handlePrevImage}>&#10094;</button>
+                    <img
+                        src={selectedProjectDetails.images[currentImageIndex]}
+                        alt={selectedProjectDetails.name}
+                        className="project-details-image"
+                    />
+                    <button className="slider-button next" onClick={handleNextImage}>&#10095;</button>
+                    <div className="slider-indicators">
+                        {selectedProjectDetails.images.map((_, index) => (
+                            <div
+                                key={index}
+                                className={`slider-indicator ${index === currentImageIndex ? 'active' : ''}`}
+                                onClick={() => setCurrentImageIndex(index)}
+                            />
+                        ))}
+                    </div>
+                </div>
+                <div className="project-details">
+                    <h2>{selectedProjectDetails.name}</h2>
+                    <p><strong>Client:</strong> {selectedProjectDetails.client}</p>
+                    <p><strong>Capacity:</strong> {selectedProjectDetails.capacity}</p>
+                    <p><strong>Category:</strong> {selectedProjectDetails.category}</p>
+                    <p><strong>Description:</strong> {selectedProjectDetails.description}</p>
+                    <br />
+                    <br />
+                    <button onClick={() => handleShare(selectedProjectDetails)}>Share</button>
+                    <br />
+                    <br />
+                    <button onClick={handleBackToGrid}>Back to Project List</button>
+                </div>
+            </div>
         );
     };
 
-    const handlePrevImage = () => {
-        setCurrentImageIndex((prevIndex) => 
-            (prevIndex - 1 + selectedProjectDetails.images.length) % selectedProjectDetails.images.length
-        );
-    };
-
+    // Render the project grid
     const renderProjectGrid = () => {
         let filteredProjects = [...projects];
-    
+
         if (selectedCategory !== 'all') {
             filteredProjects = filteredProjects.filter(
                 (project) => project.category === selectedCategory
             );
         }
-    
+
         if (searchQuery) {
             const lowerQuery = searchQuery.toLowerCase();
             filteredProjects = filteredProjects.filter((project) => {
@@ -258,7 +221,7 @@ function ProjectShowcase() {
                 );
             });
         }
-    
+
         let sortedAndFilteredProjects = [...filteredProjects];
         if (sortCriteria === 'name') {
             sortedAndFilteredProjects.sort((a, b) => a.name.localeCompare(b.name));
@@ -271,7 +234,7 @@ function ProjectShowcase() {
         } else if (sortCriteria === 'view_count') {
             sortedAndFilteredProjects.sort((a, b) => b.view_count - a.view_count);
         }
-    
+
         const finalProjects = [...sortedAndFilteredProjects].sort((a, b) => {
             const aIsFavorite = favoriteProjectIds.includes(a.id);
             const bIsFavorite = favoriteProjectIds.includes(b.id);
@@ -279,12 +242,11 @@ function ProjectShowcase() {
             if (!aIsFavorite && bIsFavorite) return 1;
             return 0;
         });
-    
+
         return (
             <div className="projects-grid">
                 {finalProjects.map(project => (
                     <div key={project.id} className="project-card">
-                        {/* Ensure images array exists and has at least one image */}
                         {project.images && project.images.length > 0 ? (
                             <img src={project.images[0]} alt={project.name} className="project-image" />
                         ) : (
@@ -316,95 +278,6 @@ function ProjectShowcase() {
             </div>
         );
     };
-    
-    const renderProjectDetails = () => {
-        if (!selectedProjectDetails) return <div>Loading details...</div>;
-
-        return (
-            <div className="project-details-container">
-                <div className="image-slider">
-                    <button className="slider-button prev" onClick={handlePrevImage}>&#10094;</button>
-                    <img src={selectedProjectDetails.images[currentImageIndex]} alt={selectedProjectDetails.name} className="project-details-image" />
-                    <button className="slider-button next" onClick={handleNextImage}>&#10095;</button>
-                </div>
-                <div className="project-details">
-                    <h2>{selectedProjectDetails.name}</h2>
-                    <p><strong>Client:</strong> {selectedProjectDetails.client}</p>
-                    <p><strong>Capacity:</strong> {selectedProjectDetails.capacity}</p>
-                    <p><strong>Category:</strong> {selectedProjectDetails.category}</p>
-                    <p><strong>Description:</strong> {selectedProjectDetails.description}</p>
-                    <br />
-                    <br />
-                    <button onClick={() => handleShare(selectedProjectDetails)}>Share</button>
-                    <br />
-                    <br />
-                    <button onClick={handleBackToGrid}>Back to Project List</button>
-                </div>
-            </div>
-        );
-    };
-
-    const renderEditForm = () => {
-        const projectToEdit = projects.find(project => project.id === editingProjectId);
-        if (!projectToEdit) return <div>Loading edit form...</div>;
-
-        return <ProjectForm
-            initialData={projectToEdit}
-            onSave={handleUpdateProject}
-            onCancel={handleCancelEdit}
-            formType="edit"
-        />;
-    };
-
-    const renderNewEntryForm = () => {
-        return <ProjectForm
-            onSave={handleCreateProject}
-            onCancel={handleCancelNewEntry}
-            formType="new"
-        />;
-    };
-
-    const handleCreateProject = async (projectData) => {
-        setIsLoading(true);
-        try {
-            const projectsCollection = collection(db, 'projects');
-            await addDoc(projectsCollection, projectData);
-            const querySnapshot = await getDocs(projectsCollection);
-            const projectsList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            setProjects(projectsList);
-
-            setIsCreatingNew(false);
-            setSuccessMessage('Project created successfully.');
-            setErrorMessage('');
-            setIsLoading(false);
-        } catch (error) {
-            console.error('Error creating Project:', error);
-            setErrorMessage('Error creating Project.');
-            setSuccessMessage('');
-            setIsLoading(false);
-        }
-    };
-
-    const handleUpdateProject = async (id, projectData) => {
-        setIsLoading(true);
-        try {
-            const projectDocRef = doc(db, 'projects', id);
-            await updateDoc(projectDocRef, projectData);
-            const querySnapshot = await getDocs(collection(db, 'projects'));
-            const projectsList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            setProjects(projectsList);
-            setIsEditing(false);
-            setEditingProjectId(null);
-            setSuccessMessage('Project updated successfully.');
-            setErrorMessage('');
-            setIsLoading(false);
-        } catch (error) {
-            console.error('Error updating Project:', error);
-            setErrorMessage('Error updating Project.');
-            setSuccessMessage('');
-            setIsLoading(false);
-        }
-    };
 
     return (
         <div className="project-showcase-page">
@@ -413,12 +286,13 @@ function ProjectShowcase() {
                 <button onClick={handleNewEntryClick} className="new-entry-button">New Entry</button>
             )}
 
+            {/* Filter, search, and sorting options */}
             <div className="filter-options">
                 <label htmlFor="category-filter">Filter by Category:</label>
                 <select
                     id="category-filter"
                     value={selectedCategory}
-                    onChange={handleCategoryChange}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
                 >
                     <option value="all">All</option>
                     <option value="residential">Residential</option>
@@ -431,13 +305,13 @@ function ProjectShowcase() {
                     type="text"
                     placeholder="Search projects..."
                     value={searchQuery}
-                    onChange={handleSearchChange}
+                    onChange={(e) => setSearchQuery(e.target.value)}
                 />
             </div>
 
             <div className="sorting-options">
                 <label htmlFor="sort">Sort by:</label>
-                <select id="sort" value={sortCriteria} onChange={handleSortChange}>
+                <select id="sort" value={sortCriteria} onChange={(e) => setSortCriteria(e.target.value)}>
                     <option value="name">Name</option>
                     <option value="capacity_asc">Capacity: Low to High</option>
                     <option value="capacity_desc">Capacity: High to Low</option>
@@ -462,120 +336,5 @@ function ProjectShowcase() {
         </div>
     );
 }
-
-const ProjectForm = ({ initialData, onSave, onCancel, formType }) => {
-    const [name, setName] = useState(initialData?.name || '');
-    const [description, setDescription] = useState(initialData?.description || '');
-    const [capacity, setCapacity] = useState(initialData?.capacity || '');
-    const [client, setClient] = useState(initialData?.client || '');
-    const [images, setImages] = useState(initialData?.images || []);
-    const [category, setCategory] = useState(initialData?.category || 'residential');
-    const [previewImages, setPreviewImages] = useState(initialData?.images || []);
-    const [isImageLoading, setIsImageLoading] = useState(false);
-
-    const handleSubmit = async (event) => {
-        event.preventDefault();
-        if (isImageLoading) {
-            alert("Please wait for the image to finish loading before saving.");
-            return;
-        }
-        const projectData = { name, description, capacity, client, images, category, view_count: initialData?.view_count || 0 };
-        if (formType === 'edit') {
-            await onSave(initialData.id, projectData);
-        } else {
-            await onSave(projectData);
-        }
-    };
-
-    const handleImageChange = async (event) => {
-        const files = event.target.files;
-        if (!files || files.length === 0) return;
-
-        setIsImageLoading(true);
-
-        try {
-            const compressedFiles = await Promise.all(
-                Array.from(files).map(file => imageCompression(file, {
-                    maxSizeMB: 0.1,
-                    maxWidthOrHeight: 800,
-                    useWebWorker: true,
-                }))
-            );
-
-            const readers = compressedFiles.map(file => {
-                return new Promise((resolve) => {
-                    const reader = new FileReader();
-                    reader.onloadend = () => {
-                        resolve(reader.result);
-                    };
-                    reader.readAsDataURL(file);
-                });
-            });
-
-            const base64Strings = await Promise.all(readers);
-            setImages(base64Strings);
-            setPreviewImages(base64Strings);
-            setIsImageLoading(false);
-        } catch (error) {
-            console.error('Image compression error:', error);
-            setIsImageLoading(false);
-            const readers = Array.from(files).map(file => {
-                return new Promise((resolve) => {
-                    const reader = new FileReader();
-                    reader.onloadend = () => {
-                        resolve(reader.result);
-                    };
-                    reader.readAsDataURL(file);
-                });
-            });
-
-            const base64Strings = await Promise.all(readers);
-            setImages(base64Strings);
-            setPreviewImages(base64Strings);
-        }
-    };
-
-    return (
-        <form onSubmit={handleSubmit} className="project-form">
-            <h2>{formType === 'edit' ? 'Edit Project' : 'New Project'}</h2>
-            <div className="form-group">
-                <label htmlFor="name">Name:</label>
-                <input type="text" id="name" value={name} onChange={(e) => setName(e.target.value)} required />
-            </div>
-            <div className="form-group">
-                <label htmlFor="description">Description:</label>
-                <textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} />
-            </div>
-            <div className="form-group">
-                <label htmlFor="capacity">Capacity:</label>
-                <input type="text" id="capacity" value={capacity} onChange={(e) => setCapacity(e.target.value)} />
-            </div>
-            <div className="form-group">
-                <label htmlFor="client">Client:</label>
-                <input type="text" id="client" value={client} onChange={(e) => setClient(e.target.value)} />
-            </div>
-            <div className="form-group">
-                <label htmlFor="category">Category:</label>
-                <select id="category" value={category} onChange={(e) => setCategory(e.target.value)}>
-                    <option value="residential">Residential</option>
-                    <option value="industrial">Industrial</option>
-                </select>
-            </div>
-            <div className="form-group">
-                <label htmlFor="images">Images:</label>
-                <input type="file" id="images" accept="image/*" multiple onChange={handleImageChange} />
-                <div className="image-preview-container">
-                    {previewImages.map((image, index) => (
-                        <img key={index} src={image} alt={`Preview ${index}`} className="image-preview" />
-                    ))}
-                </div>
-            </div>
-            <div className="form-actions">
-                <button type="submit">Save</button>
-                <button type="button" onClick={onCancel}>Cancel</button>
-            </div>
-        </form>
-    );
-};
 
 export default ProjectShowcase;
