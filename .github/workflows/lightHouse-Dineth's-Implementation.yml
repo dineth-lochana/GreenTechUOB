@@ -1,4 +1,5 @@
-name: Google Lighthouse Performance Test
+name: Google Lighthouse Performance Test Dineth
+
 on:
   push:
     branches:
