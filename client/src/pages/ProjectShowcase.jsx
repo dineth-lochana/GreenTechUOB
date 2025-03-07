@@ -33,7 +33,8 @@ function ProjectShowcase() {
     const [favoriteProjectIds, setFavoriteProjectIds] = useState([]);
     const [sortCriteria, setSortCriteria] = useState('name');
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedCategory, setSelectedCategory] = useState('all'); // New state for category filter
+    const [selectedCategory, setSelectedCategory] = useState('all');
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
     useEffect(() => {
         const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
@@ -227,28 +228,37 @@ function ProjectShowcase() {
         setSelectedCategory(event.target.value);
     };
 
+    const handleNextImage = () => {
+        setCurrentImageIndex((prevIndex) => 
+            (prevIndex + 1) % selectedProjectDetails.images.length
+        );
+    };
+
+    const handlePrevImage = () => {
+        setCurrentImageIndex((prevIndex) => 
+            (prevIndex - 1 + selectedProjectDetails.images.length) % selectedProjectDetails.images.length
+        );
+    };
+
     const renderProjectGrid = () => {
         let filteredProjects = [...projects];
-
-       
+    
         if (selectedCategory !== 'all') {
             filteredProjects = filteredProjects.filter(
                 (project) => project.category === selectedCategory
             );
         }
-
-        
+    
         if (searchQuery) {
             const lowerQuery = searchQuery.toLowerCase();
             filteredProjects = filteredProjects.filter((project) => {
                 return (
                     project.name.toLowerCase().includes(lowerQuery) ||
-                    project.content.toLowerCase().includes(lowerQuery)
+                    project.description.toLowerCase().includes(lowerQuery)
                 );
             });
         }
-
-        
+    
         let sortedAndFilteredProjects = [...filteredProjects];
         if (sortCriteria === 'name') {
             sortedAndFilteredProjects.sort((a, b) => a.name.localeCompare(b.name));
@@ -261,8 +271,7 @@ function ProjectShowcase() {
         } else if (sortCriteria === 'view_count') {
             sortedAndFilteredProjects.sort((a, b) => b.view_count - a.view_count);
         }
-
-        
+    
         const finalProjects = [...sortedAndFilteredProjects].sort((a, b) => {
             const aIsFavorite = favoriteProjectIds.includes(a.id);
             const bIsFavorite = favoriteProjectIds.includes(b.id);
@@ -270,15 +279,22 @@ function ProjectShowcase() {
             if (!aIsFavorite && bIsFavorite) return 1;
             return 0;
         });
-
+    
         return (
             <div className="projects-grid">
                 {finalProjects.map(project => (
                     <div key={project.id} className="project-card">
-                        <img src={project.image} alt={project.name} className="project-image" />
+                        {/* Ensure images array exists and has at least one image */}
+                        {project.images && project.images.length > 0 ? (
+                            <img src={project.images[0]} alt={project.name} className="project-image" />
+                        ) : (
+                            <div className="no-image">No Image Available</div>
+                        )}
                         <h3>{project.name}</h3>
                         <p>Capacity: {project.capacity}</p>
                         <p>Category: {project.category}</p>
+                        <p>Client: {project.client}</p>
+                        <p>Description: {project.description}</p>
                         <div className="project-actions">
                             <button onClick={() => handleViewDetails(project.id)}>View Details</button>
                             {isLoggedIn && (
@@ -300,21 +316,23 @@ function ProjectShowcase() {
             </div>
         );
     };
-
+    
     const renderProjectDetails = () => {
         if (!selectedProjectDetails) return <div>Loading details...</div>;
 
         return (
             <div className="project-details-container">
-                <div className="project-image-container">
-                    <img src={selectedProjectDetails.image} alt={selectedProjectDetails.name} className="project-details-image" />
+                <div className="image-slider">
+                    <button className="slider-button prev" onClick={handlePrevImage}>&#10094;</button>
+                    <img src={selectedProjectDetails.images[currentImageIndex]} alt={selectedProjectDetails.name} className="project-details-image" />
+                    <button className="slider-button next" onClick={handleNextImage}>&#10095;</button>
                 </div>
                 <div className="project-details">
                     <h2>{selectedProjectDetails.name}</h2>
-                    <p><strong>Content:</strong> {selectedProjectDetails.content}</p>
+                    <p><strong>Client:</strong> {selectedProjectDetails.client}</p>
                     <p><strong>Capacity:</strong> {selectedProjectDetails.capacity}</p>
                     <p><strong>Category:</strong> {selectedProjectDetails.category}</p>
-                    <p><strong>Misc:</strong> {selectedProjectDetails.misc}</p>
+                    <p><strong>Description:</strong> {selectedProjectDetails.description}</p>
                     <br />
                     <br />
                     <button onClick={() => handleShare(selectedProjectDetails)}>Share</button>
@@ -447,12 +465,12 @@ function ProjectShowcase() {
 
 const ProjectForm = ({ initialData, onSave, onCancel, formType }) => {
     const [name, setName] = useState(initialData?.name || '');
-    const [content, setContent] = useState(initialData?.content || '');
+    const [description, setDescription] = useState(initialData?.description || '');
     const [capacity, setCapacity] = useState(initialData?.capacity || '');
-    const [image, setImage] = useState(initialData?.image || '');
-    const [misc, setMisc] = useState(initialData?.misc || '');
+    const [client, setClient] = useState(initialData?.client || '');
+    const [images, setImages] = useState(initialData?.images || []);
     const [category, setCategory] = useState(initialData?.category || 'residential');
-    const [previewImage, setPreviewImage] = useState(initialData?.image || null);
+    const [previewImages, setPreviewImages] = useState(initialData?.images || []);
     const [isImageLoading, setIsImageLoading] = useState(false);
 
     const handleSubmit = async (event) => {
@@ -461,7 +479,7 @@ const ProjectForm = ({ initialData, onSave, onCancel, formType }) => {
             alert("Please wait for the image to finish loading before saving.");
             return;
         }
-        const projectData = { name, content, capacity, image, misc, category, view_count: initialData?.view_count || 0 };
+        const projectData = { name, description, capacity, client, images, category, view_count: initialData?.view_count || 0 };
         if (formType === 'edit') {
             await onSave(initialData.id, projectData);
         } else {
@@ -470,36 +488,50 @@ const ProjectForm = ({ initialData, onSave, onCancel, formType }) => {
     };
 
     const handleImageChange = async (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
+        const files = event.target.files;
+        if (!files || files.length === 0) return;
 
         setIsImageLoading(true);
 
         try {
-            const compressedFile = await imageCompression(file, {
-                maxSizeMB: 0.1,
-                maxWidthOrHeight: 800,
-                useWebWorker: true,
+            const compressedFiles = await Promise.all(
+                Array.from(files).map(file => imageCompression(file, {
+                    maxSizeMB: 0.1,
+                    maxWidthOrHeight: 800,
+                    useWebWorker: true,
+                }))
+            );
+
+            const readers = compressedFiles.map(file => {
+                return new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        resolve(reader.result);
+                    };
+                    reader.readAsDataURL(file);
+                });
             });
 
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                const base64String = reader.result;
-                setImage(base64String);
-                setPreviewImage(base64String);
-                setIsImageLoading(false);
-            };
-            reader.readAsDataURL(compressedFile);
+            const base64Strings = await Promise.all(readers);
+            setImages(base64Strings);
+            setPreviewImages(base64Strings);
+            setIsImageLoading(false);
         } catch (error) {
             console.error('Image compression error:', error);
             setIsImageLoading(false);
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                const base64String = reader.result;
-                setImage(base64String);
-                setPreviewImage(base64String);
-            };
-            reader.readAsDataURL(file);
+            const readers = Array.from(files).map(file => {
+                return new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        resolve(reader.result);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            });
+
+            const base64Strings = await Promise.all(readers);
+            setImages(base64Strings);
+            setPreviewImages(base64Strings);
         }
     };
 
@@ -511,12 +543,16 @@ const ProjectForm = ({ initialData, onSave, onCancel, formType }) => {
                 <input type="text" id="name" value={name} onChange={(e) => setName(e.target.value)} required />
             </div>
             <div className="form-group">
-                <label htmlFor="content">Content:</label>
-                <textarea id="content" value={content} onChange={(e) => setContent(e.target.value)} />
+                <label htmlFor="description">Description:</label>
+                <textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} />
             </div>
             <div className="form-group">
                 <label htmlFor="capacity">Capacity:</label>
                 <input type="text" id="capacity" value={capacity} onChange={(e) => setCapacity(e.target.value)} />
+            </div>
+            <div className="form-group">
+                <label htmlFor="client">Client:</label>
+                <input type="text" id="client" value={client} onChange={(e) => setClient(e.target.value)} />
             </div>
             <div className="form-group">
                 <label htmlFor="category">Category:</label>
@@ -526,13 +562,13 @@ const ProjectForm = ({ initialData, onSave, onCancel, formType }) => {
                 </select>
             </div>
             <div className="form-group">
-                <label htmlFor="image">Image:</label>
-                <input type="file" id="image" accept="image/*" onChange={handleImageChange} />
-                {previewImage && <img src={previewImage} alt="Preview" className="image-preview" />}
-            </div>
-            <div className="form-group">
-                <label htmlFor="misc">Misc:</label>
-                <input type="text" id="misc" value={misc} onChange={(e) => setMisc(e.target.value)} />
+                <label htmlFor="images">Images:</label>
+                <input type="file" id="images" accept="image/*" multiple onChange={handleImageChange} />
+                <div className="image-preview-container">
+                    {previewImages.map((image, index) => (
+                        <img key={index} src={image} alt={`Preview ${index}`} className="image-preview" />
+                    ))}
+                </div>
             </div>
             <div className="form-actions">
                 <button type="submit">Save</button>
