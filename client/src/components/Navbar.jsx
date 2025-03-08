@@ -51,7 +51,7 @@ function Navbar() {
                     <li><a href="./#/Learn">Learn</a></li>
                     {isLoggedIn ? (
                         <>
-                            <li><span>{userEmail}</span></li>
+                           
                             <li>
                                 <a href="./#logout" onClick={handleLogout} className="logout-link">
                                     Logout
