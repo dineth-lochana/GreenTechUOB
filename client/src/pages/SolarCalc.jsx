@@ -112,7 +112,6 @@ function SolarCalc() {
             Solar ROI Calculator
           </h1>
           <p className="mt-2 text-gray-600">Calculate your solar investment returns</p>
-          <p>Logged in as: {userEmail}</p>
         </div>
 
         <div className="card-container">
