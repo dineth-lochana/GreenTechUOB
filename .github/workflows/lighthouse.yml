@@ -27,6 +27,9 @@ jobs:
             https://dineth-lochana.github.io/GreenTechUOB/#/Learn
             https://dineth-lochana.github.io/GreenTechUOB/#/fireSafety
             https://dineth-lochana.github.io/GreenTechUOB/#/variableDrives
+            https://dineth-lochana.github.io/GreenTechUOB/#/projectShowcase
+            https://dineth-lochana.github.io/GreenTechUOB/#/solar
+            https://dineth-lochana.github.io/GreenTechUOB/#/SolarCalc
           uploadArtifacts: true
           temporaryPublicStorage: true
 
@@ -42,6 +45,9 @@ jobs:
           echo "- 🔗 [learn Report](https://dineth-lochana.github.io/GreenTechUOB/#/Learn/)" >> lighthouse-report.md
           echo "- 🔗 [fireSafety Page Report](https://dineth-lochana.github.io/GreenTechUOB/#/fireSafety)" >> lighthouse-report.md
           echo "- 🔗 [variableDrives Page Report](https://dineth-lochana.github.io/GreenTechUOB/#/variableDrives)" >> lighthouse-report.md
+          echo "- 🔗 [Project Showcase](https://dineth-lochana.github.io/GreenTechUOB/#/projectShowcase)" >> lighthouse-report.md
+          echo "- 🔗 [Solar Energy Products Page](https://dineth-lochana.github.io/GreenTechUOB/#/solar)" >> lighthouse-report.md
+          echo "- 🔗 [Solar ROI Calculatort](https://dineth-lochana.github.io/GreenTechUOB/#/SolarCalc)" >> lighthouse-report.md
           
           echo "\`\`\`" >> lighthouse-report.md
           echo "Performance, Accessibility, SEO, and Best Practices scores are available in detailed reports." >> lighthouse-report.md
