@@ -12,6 +12,7 @@ import Learn from './pages/Learn.jsx';
 import NotFound from './pages/NotFound.jsx';
 import './App.css';
 import { Routes, Route } from 'react-router-dom';
+import SolarCalc from './pages/SolarCalc.jsx';
 
 function App() {
     return (
@@ -26,6 +27,7 @@ function App() {
                     <Route path="/projectShowcase" element={<ProjectShowcase />} />
                     <Route path="/loginRegister" element={<LoginRegister />} />
                     <Route path="/Learn" element={<Learn />} />
+                    <Route path="/SolarCalc" element={<SolarCalc />} />
                     <Route path="*" element={<NotFound />} />
                 </Routes>
             </main>
