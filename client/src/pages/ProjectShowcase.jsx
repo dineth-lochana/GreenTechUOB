@@ -269,7 +269,7 @@ function ProjectShowcase() {
             filteredProjects = filteredProjects.filter((project) => {
                 return (
                     project.name.toLowerCase().includes(lowerQuery) ||
-                    project.content.toLowerCase().includes(lowerQuery)
+                    project.description.toLowerCase().includes(lowerQuery)
                 );
             });
         }
