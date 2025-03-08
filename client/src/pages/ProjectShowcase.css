@@ -98,11 +98,11 @@
 }
 
 .slider-button.prev {
-    left: 440px;
+   right: 440px;
 }
 
 .slider-button.next {
-    right: 440px;
+    left: 440px;
 }
 
 .slider-indicators {
