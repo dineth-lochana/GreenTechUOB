@@ -10,9 +10,8 @@ export default defineConfig({
     'process.env.VITE_FIREBASE_API_KEY': JSON.stringify(process.env.VITE_FIREBASE_API_KEY),
     'process.env.VITE_GEMINI_API_KEY': JSON.stringify(process.env.VITE_GEMINI_API_KEY),
     'process.env.VITE_Chatling_API_KEY': JSON.stringify(process.env.VITE_Chatling_API_KEY)
-    
-  }
-  test: {
+  },
+  test: { 
     globals: true,
     environment: 'jsdom'
   }
