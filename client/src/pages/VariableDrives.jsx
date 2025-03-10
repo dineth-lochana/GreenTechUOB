@@ -1,4 +1,5 @@
 /* eslint-disable react/prop-types */
+import React from 'react';
 import { useState, useEffect } from 'react';
 import './VariableDrives.css';
 import { auth, db } from '../firebaseConfig';

@@ -1,3 +1,4 @@
+import '@testing-library/jest-dom/extend-expect';
 
 
 // Mock window methods not available in Jest environment
