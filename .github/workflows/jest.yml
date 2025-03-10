@@ -1,4 +1,4 @@
-name: Jest Tests
+name:  Tests
 
 on:
   pull_request:
@@ -9,32 +9,28 @@ on:
       - master
 
 jobs:
-  jest:
-    name: Run Jest Tests
+  vitest:
+    name: Run Vitest Tests
     runs-on: ubuntu-latest
-
     strategy:
       matrix:
         node-version: [23.x]
-
+    
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
+      
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
-
+      
       - name: Install dependencies
         run: |
           npm install
+          npm install --save-dev vitest
         working-directory: client
-
-      - name: Run Jest tests
-        run: npm test -- --passWithNoTests
-        working-directory: client
-        
-      - name: Check code formatting
-        run: npx prettier --check "src/**/*.{js,jsx}" || true
+      
+      - name: Run Vitest tests
+        run: npx vitest run --passWithNoTests
         working-directory: client
