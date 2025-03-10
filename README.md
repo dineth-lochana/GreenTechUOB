@@ -1,6 +1,6 @@
 # GreenTechUOB CS01
  
-## Group Members
+## Group Members  
 | Member | UOB Number | Role | 
 |----------|----------|----------|
 | Dineth Mallawarachchi | 2424617 | Project Manager |
