@@ -12,4 +12,8 @@ export default defineConfig({
     'process.env.VITE_Chatling_API_KEY': JSON.stringify(process.env.VITE_Chatling_API_KEY)
     
   }
+  test: {
+    globals: true,
+    environment: 'jsdom'
+  }
 })
