@@ -25,12 +25,23 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       
+      - name: Clean install directories
+        run: |
+          rm -rf node_modules
+          rm -f package-lock.json
+        working-directory: client
+      
       - name: Install dependencies
         run: |
-          npm install
-          npm install --save-dev vitest
+          npm install --no-optional
+          npm install --save-dev vitest @vitest/ui @testing-library/react @testing-library/jest-dom
+          npm install --save-dev rollup@latest @rollup/rollup-linux-x64-gnu
         working-directory: client
       
       - name: Run Vitest tests
         run: npx vitest run --passWithNoTests
+        working-directory: client
+      
+      - name: Check code formatting
+        run: npx prettier --check "src/**/*.{js,jsx}" || true
         working-directory: client
