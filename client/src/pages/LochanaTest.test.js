@@ -4,7 +4,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, test, expect, beforeEach, vi } from 'vitest';
-import LoginRegister from '../LoginRegister';
+import LoginRegister from './LoginRegister';
 
 vi.mock('firebase/auth', () => ({
   createUserWithEmailAndPassword: vi.fn(() => Promise.resolve({ user: { uid: 'testUid' } })),
