@@ -71,7 +71,6 @@ describe('VariableDrives Component', () => {
 
     it('renders "New Entry" button when logged in (simple check - not fully testing auth)', async () => {
         onAuthStateChanged.mockImplementation(callback => {
-            // Simulate user logged in asynchronously
             Promise.resolve().then(() => {
                 callback({ email: 'test@example.com' });
             });
