@@ -1,7 +1,8 @@
-name: CI and Deploy 
+name: CI and Deploy
+
 on:
   push:
-    branches: 
+    branches:
       - master
   pull_request:
     branches:
@@ -9,7 +10,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -40,7 +41,6 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
-      # Clean install dependencies
       - name: Clean install dependencies
         run: |
           rm -rf node_modules
@@ -48,7 +48,6 @@ jobs:
           npm install
         working-directory: client
 
-      # Install and build the client
       - name: Install and build client
         working-directory: client
         env:
@@ -59,7 +58,19 @@ jobs:
           npm install
           npm run build
 
-      # Upload and deploy
+      - name: Zip build output
+        run: zip -r build-output.zip client/dist
+        shell: bash
+
+      - name: Commit build zip
+        run: |
+          git config --local user.email "actions@github.com"
+          git config --local user.name "GitHub Actions"
+          git add build-output.zip
+          git commit -m "Add build output zip" || echo "No changes to commit" # Handle no changes case
+          git push origin ${{ github.ref }}
+        shell: bash
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
