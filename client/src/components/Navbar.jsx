@@ -53,7 +53,7 @@ function Navbar() {
                         <>
                            
                             <li>
-                                <a href="./#logout" onClick={handleLogout} className="logout-link">
+                                <a href="./#/loginRegister" onClick={handleLogout} className="logout-link">
                                     Logout
                                 </a>
                             </li>
