@@ -17,6 +17,15 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+.project-card h3 {
+    font-size: 18px;
+    margin-bottom: 10px; 
+    overflow: hidden;        
+    text-overflow: ellipsis; 
+    white-space: nowrap;  
+}
+
+
 .project-image {
     max-width: 100%;
     height: auto;
