@@ -17,6 +17,15 @@
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
+.extinguisher-card h3 {
+    font-size: 18px;
+    margin: 10px 0; 
+    overflow: hidden;        
+    text-overflow: ellipsis;
+    white-space: nowrap; 
+}
+
+
 .extinguisher-image {
     max-width: 100%;
     height: auto;
