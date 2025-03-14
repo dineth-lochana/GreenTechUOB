@@ -304,7 +304,6 @@ function ProjectShowcase() {
                         <p>Capacity: {project.capacity}</p>
                         <p>Category: {project.category}</p>
                         <p>Client: {project.client}</p>
-                        <p>Description: {project.description}</p>
                         <div className="project-actions">
                             <button onClick={() => handleViewDetails(project.id)}>View Details</button>
                             {isLoggedIn && (
