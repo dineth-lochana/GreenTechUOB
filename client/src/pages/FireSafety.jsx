@@ -167,27 +167,25 @@ function VariableExtinguishers() {
 
 const handleShare = async (extinguisherDetails) => {
     try {
-        const shareData = {
-            title: extinguisherDetails.name,
-            text: `Check out this fire extinguisher: ${extinguisherDetails.name}. Price: ${extinguisherDetails.price}. Details: ${extinguisherDetails.content}. Additional Info: ${extinguisherDetails.misc}`,
-            //url: window.location.href, // You can keep this if you want to share the link as well
-        };
+        const subject = `Check out this fire extinguisher: ${extinguisherDetails.name}`;
+        const body = `Details of the fire extinguisher:\n\n` +
+                     `Name: ${extinguisherDetails.name}\n` +
+                     `Price: ${extinguisherDetails.price}\n` +
+                     `Content: ${extinguisherDetails.content}\n` +
+                     `Additional Info: ${extinguisherDetails.misc}\n\n` +
+                     `Check it out!`;
 
-        if (navigator.share) {
-            await navigator.share(shareData);
-        } else {
-            // Fallback: Copy text to clipboard
-            await navigator.clipboard.writeText(
-                `${shareData.title}\n${shareData.text}\n${shareData.url}`
-            );
-            alert('Extinguisher details copied to clipboard!');
-        }
+        // Create a mailto link
+        const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+        // Open the default email client
+        window.location.href = mailtoLink;
+
     } catch (error) {
         console.error('Error sharing:', error);
         alert('Sharing failed. Please try again.');
     }
 };
-
     const handleToggleFavorite = async (extinguisherId) => {
         if (!isLoggedIn) {
             alert("Please log in to favorite Extinguisher.");
