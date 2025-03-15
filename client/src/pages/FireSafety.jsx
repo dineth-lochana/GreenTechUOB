@@ -21,7 +21,7 @@ import imageCompression from 'browser-image-compression';
 
 function VariableExtinguishers() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [userEmail, setUser Email] = useState(null);
+    const [userEmail, setUserEmail] = useState(null);
     const [fireExtinguishers, setFireExtinguishers] = useState([]);
     const [selectedExtinguisherId, setSelectedExtinguisherId] = useState(null);
     const [selectedExtinguisherDetails, setSelectedExtinguisherDetails] = useState(null);
