@@ -1,20 +1,23 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { doc, getDoc } from 'firebase/firestore';
+import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 
 function ExtinguisherDetails() {
-    const { id } = useParams();
+    const { slug } = useParams();
     const navigate = useNavigate();
     const [extinguisherDetails, setExtinguisherDetails] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const fetchExtinguisherDetails = async () => {
-            const extinguisherDocRef = doc(db, 'fireExtinguishers', id);
-            const docSnap = await getDoc(extinguisherDocRef);
-            if (docSnap.exists()) {
-                setExtinguisherDetails({ id: docSnap.id, ...docSnap.data() });
+            const extinguishersCollection = collection(db, 'fireExtinguishers');
+            const querySnapshot = await getDocs(extinguishersCollection);
+            const extinguishersList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+            const extinguisher = extinguishersList.find(ext => slugify(ext.name) === slug);
+            if (extinguisher) {
+                setExtinguisherDetails(extinguisher);
             } else {
                 console.error('Extinguisher details not found');
             }
@@ -22,7 +25,7 @@ function ExtinguisherDetails() {
         };
 
         fetchExtinguisherDetails();
-    }, [id]);
+    }, [slug]);
 
     if (isLoading) {
         return <div>Loading details...</div>;
@@ -40,7 +43,7 @@ function ExtinguisherDetails() {
             <div className="extinguisher-details">
                 <h2>{extinguisherDetails.name}</h2>
                 <p><strong>Content:</strong> {extinguisherDetails.content}</p>
-                <p><strong>Price:</strong> {extinguisherDetails.price}</p>
+                <p>< strong>Price:</strong> {extinguisherDetails.price}</p>
                 <p><strong>Misc:</strong> {extinguisherDetails.misc}</p>
                 <br />
                 <br />
