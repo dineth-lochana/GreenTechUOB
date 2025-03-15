@@ -175,17 +175,18 @@ const handleShare = async (extinguisherDetails) => {
                      `Additional Info: ${extinguisherDetails.misc}\n\n` +
                      `Check it out!`;
 
-        // Create a mailto link
-        const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        // Create a Gmail link
+        const gmailLink = `https://mail.google.com/mail/?view=cm&fs=1&to=&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
-        // Open the default email client
-        window.location.href = mailtoLink;
+        // Open Gmail in a new tab
+        window.open(gmailLink, '_blank');
 
     } catch (error) {
         console.error('Error sharing:', error);
         alert('Sharing failed. Please try again.');
     }
 };
+    
     const handleToggleFavorite = async (extinguisherId) => {
         if (!isLoggedIn) {
             alert("Please log in to favorite Extinguisher.");
