@@ -16,11 +16,12 @@ import {
     arrayRemove,
     setDoc
 } from 'firebase/firestore';
+import { useNavigate } from 'react-router-dom';
 import imageCompression from 'browser-image-compression';
 
 function VariableExtinguishers() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [userEmail, setUserEmail] = useState(null);
+    const [userEmail, setUser Email] = useState(null);
     const [fireExtinguishers, setFireExtinguishers] = useState([]);
     const [selectedExtinguisherId, setSelectedExtinguisherId] = useState(null);
     const [selectedExtinguisherDetails, setSelectedExtinguisherDetails] = useState(null);
@@ -32,13 +33,14 @@ function VariableExtinguishers() {
     const [isLoading, setIsLoading] = useState(true);
     const [favoriteExtinguisherIds, setFavoriteExtinguisherIds] = useState([]);
     const [sortCriteria, setSortCriteria] = useState('name');
-    const [searchQuery, setSearchQuery] = useState('');
+    const [searchQuery, setSearchQuery] = useState([]);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
             if (user) {
                 setIsLoggedIn(true);
-                setUserEmail(user.email);
+                setUser Email(user.email);
                 const favoritesDocRef = doc(db, 'userFavorites', user.email);
                 try {
                     const docSnap = await getDoc(favoritesDocRef);
@@ -55,7 +57,7 @@ function VariableExtinguishers() {
                 }
             } else {
                 setIsLoggedIn(false);
-                setUserEmail(null);
+                setUser Email(null);
                 setFavoriteExtinguisherIds([]);
             }
         });
@@ -81,30 +83,7 @@ function VariableExtinguishers() {
     }, []);
 
     const handleViewDetails = async (id) => {
-        setSelectedExtinguisherId(id);
-        setSelectedExtinguisherDetails(null);
-        setIsEditing(false);
-        setIsCreatingNew(false);
-        setErrorMessage('');
-        setSuccessMessage('');
-        setIsLoading(true);
-        try {
-            const extinguisherDocRef = doc(db, 'fireExtinguishers', id);
-            await updateDoc(extinguisherDocRef, { view_count: increment(1) });
-
-            const docSnap = await getDoc(extinguisherDocRef);
-            if (docSnap.exists()) {
-                setSelectedExtinguisherDetails({ id: docSnap.id, ...docSnap.data() });
-            } else {
-                console.error('Extinguisher details not found');
-                setErrorMessage('Extinguisher details not found.');
-            }
-            setIsLoading(false);
-        } catch (error) {
-            console.error('Error fetching Extinguisher details:', error);
-            setErrorMessage('Error loading Extinguisher details.');
-            setIsLoading(false);
-        }
+        navigate(`/fire-extinguishers/${id}`);
     };
 
     const handleBackToGrid = () => {
@@ -166,27 +145,20 @@ function VariableExtinguishers() {
     };
 
     const handleShare = async (extinguisherDetails) => {
-    try {
+        const shareUrl = `${window.location.origin}/fire-extinguishers/${extinguisherDetails.id}`;
         const shareData = {
             title: extinguisherDetails.name,
             text: `Check out this fire extinguisher: ${extinguisherDetails.name}. Price: ${extinguisherDetails.price}. Details: ${extinguisherDetails.content}. Additional Info: ${extinguisherDetails.misc}`,
-            url: window.location.href, // Current page URL (consider adding routing for direct links)
+            url: shareUrl,
         };
 
         if (navigator.share) {
             await navigator.share(shareData);
         } else {
-            // Fallback: Copy text to clipboard
-            await navigator.clipboard.writeText(
-                `${shareData.title}\n${shareData.text}\n${shareData.url}`
-            );
+            await navigator.clipboard.writeText(`${shareData.title}\n${shareData.text}\n${shareData.url}`);
             alert('Extinguisher details copied to clipboard!');
         }
-    } catch (error) {
-        console.error('Error sharing:', error);
-        alert('Sharing failed. Please try again.');
-    }
-};
+    };
 
     const handleToggleFavorite = async (extinguisherId) => {
         if (!isLoggedIn) {
@@ -246,7 +218,7 @@ function VariableExtinguishers() {
                     return parseFloat(
                         price
                             .replace(/Rs\.?\s*/i, '')
-                            .replace(/,/g, '')
+                            .replace(/ ,/g, '')
                             .replace(/[^0-9.]/g, '')
                             || 0
                     );
@@ -297,33 +269,9 @@ function VariableExtinguishers() {
         );
     };
 
-    const renderExtinguisherDetails = () => {
-        if (!selectedExtinguisherDetails) return <div>Loading details...</div>;
-
-        return (
-            <div className="extinguisher-details-container">
-                <div className="extinguisher-image-container">
-                    <img src={selectedExtinguisherDetails.image} alt={selectedExtinguisherDetails.name} className="extinguisher-details-image" />
-                </div>
-                <div className="extinguisher-details">
-                    <h2>{selectedExtinguisherDetails.name}</h2>
-                    <p><strong>Content:</strong> {selectedExtinguisherDetails.content}</p>
-                    <p><strong>Price:</strong> {selectedExtinguisherDetails.price}</p>
-                    <p><strong>Misc:</strong> {selectedExtinguisherDetails.misc}</p>
-                    <br/>
-                    <br/>
-                    <button onClick={() => handleShare(selectedExtinguisherDetails)}>Share</button>
-                    <br/>
-                    <br/>
-                    <button onClick={handleBackToGrid}>Back to Fire Extinguisher List</button>
-                </div>
-            </div>
-        );
-    };
-
     const renderEditForm = () => {
         const extinguisherToEdit = fireExtinguishers.find(extinguisher => extinguisher.id === editingExtinguisherId);
-        if (!extinguisherToEdit) return <div >Loading edit form...</div>;
+        if (!extinguisherToEdit) return <div>Loading edit form...</div>;
 
         return <ExtinguisherForm
             initialData={extinguisherToEdit}
@@ -372,7 +320,7 @@ function VariableExtinguishers() {
             setFireExtinguishers(extinguishersList);
             setIsEditing(false);
             setEditingExtinguisherId(null);
-            setSuccessMessage('Fire Extinguisher updated successfully.');
+            setSuccessMessage('Fire Extinguisher updated successfully .');
             setErrorMessage('');
             setIsLoading(false);
         } catch (error) {
@@ -492,7 +440,7 @@ const ExtinguisherForm = ({ initialData, onSave, onCancel, formType }) => {
                 <input type="text" id="name" value={name} onChange={(e) => setName(e.target.value)} required />
             </div>
             <div className="form-group">
-                <label htmlFor="content">Content:</label>
+                <label html <label htmlFor="content">Content:</label>
                 <textarea id="content" value={content} onChange={(e) => setContent(e.target.value)} />
             </div>
             <div className="form-group">
