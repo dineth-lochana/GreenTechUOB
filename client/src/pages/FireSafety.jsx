@@ -440,7 +440,7 @@ const ExtinguisherForm = ({ initialData, onSave, onCancel, formType }) => {
                 <input type="text" id="name" value={name} onChange={(e) => setName(e.target.value)} required />
             </div>
             <div className="form-group">
-                <label html <label htmlFor="content">Content:</label>
+                <label htmlFor="content">Content:</label>
                 <textarea id="content" value={content} onChange={(e) => setContent(e.target.value)} />
             </div>
             <div className="form-group">
