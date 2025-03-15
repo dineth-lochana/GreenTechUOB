@@ -295,6 +295,9 @@ function VariableDrives() {
                     )}
                     <br/>
                     <br/>
+                    <button onClick={() => handleShare(selectedDriveDetails)}>Share</button>
+                    <br/>
+                    <br/>
                     <button onClick={handleBackToGrid}>Back to Variable Drive List</button>
                 </div>
             </div>
@@ -342,6 +345,26 @@ function VariableDrives() {
         }
     };
 
+    const handleShare = async (driveDetails) => {
+        try {
+            const subject = `Check out this variable drive: ${driveDetails.name}`;
+            const body = `Details of the variable drive:\n\n` +
+                         `Name: ${driveDetails.name}\n` +
+                         `Price: ${driveDetails.price}\n` +
+                         `Content: ${driveDetails.content}\n` +
+                         `Additional Info: ${driveDetails.misc}\n\n` +
+                         `Check it out!`;
+    
+            const gmailLink = `https://mail.google.com/mail/?view=cm&fs=1&to=&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    
+            window.open(gmailLink, '_blank');
+    
+        } catch (error) {
+            console.error('Error sharing:', error);
+            alert('Sharing failed. Please try again.');
+        }
+    };
+    
     const handleUpdateDrive = async (id, driveData) => {
         setIsLoading(true);
         try {
