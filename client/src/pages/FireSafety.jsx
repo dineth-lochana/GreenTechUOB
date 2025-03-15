@@ -165,12 +165,12 @@ function VariableExtinguishers() {
         setSuccessMessage('');
     };
 
-    const handleShare = async (extinguisherDetails) => {
+const handleShare = async (extinguisherDetails) => {
     try {
         const shareData = {
             title: extinguisherDetails.name,
             text: `Check out this fire extinguisher: ${extinguisherDetails.name}. Price: ${extinguisherDetails.price}. Details: ${extinguisherDetails.content}. Additional Info: ${extinguisherDetails.misc}`,
-            url: window.location.href, // Current page URL (consider adding routing for direct links)
+            url: window.location.href, // You can keep this if you want to share the link as well
         };
 
         if (navigator.share) {
