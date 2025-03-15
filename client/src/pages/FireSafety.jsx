@@ -144,21 +144,33 @@ function VariableExtinguishers() {
         setSuccessMessage('');
     };
 
-    const handleShare = async (extinguisherDetails) => {
-        const shareUrl = `${window.location.origin}/fire-extinguishers/${extinguisherDetails.id}`;
-        const shareData = {
-            title: extinguisherDetails.name,
-            text: `Check out this fire extinguisher: ${extinguisherDetails.name}. Price: ${extinguisherDetails.price}. Details: ${extinguisherDetails.content}. Additional Info: ${extinguisherDetails.misc}`,
-            url: shareUrl,
-        };
+    const slugify = (text) => {
+    return text
+        .toString()
+        .toLowerCase()
+        .replace(/\s+/g, '-')           // Replace spaces with -
+        .replace(/[^\w\-]+/g, '')       // Remove all non-word chars
+        .replace(/\-\-+/g, '-')         // Replace multiple - with single -
+        .replace(/^-+/, '')             // Trim - from start of text
+        .replace(/-+$/, '');            // Trim - from end of text
+};
 
-        if (navigator.share) {
-            await navigator.share(shareData);
-        } else {
-            await navigator.clipboard.writeText(`${shareData.title}\n${shareData.text}\n${shareData.url}`);
-            alert('Extinguisher details copied to clipboard!');
-        }
+const handleShare = async (extinguisherDetails) => {
+    const slug = slugify(extinguisherDetails.name);
+    const shareUrl = `${window.location.origin}/fire-extinguishers/${slug}`;
+    const shareData = {
+        title: extinguisherDetails.name,
+        text: `Check out this fire extinguisher: ${extinguisherDetails.name}. Price: ${extinguisherDetails.price}. Details: ${extinguisherDetails.content}. Additional Info: ${extinguisherDetails.misc}`,
+        url: shareUrl,
     };
+
+    if (navigator.share) {
+        await navigator.share(shareData);
+    } else {
+        await navigator.clipboard.writeText(`${shareData.title}\n${shareData.text}\n${shareData.url}`);
+        alert('Extinguisher details copied to clipboard!');
+    }
+};
 
     const handleToggleFavorite = async (extinguisherId) => {
         if (!isLoggedIn) {
