@@ -40,7 +40,7 @@ function VariableExtinguishers() {
         const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
             if (user) {
                 setIsLoggedIn(true);
-                setUser Email(user.email);
+                setUserEmail(user.email);
                 const favoritesDocRef = doc(db, 'userFavorites', user.email);
                 try {
                     const docSnap = await getDoc(favoritesDocRef);
@@ -57,7 +57,7 @@ function VariableExtinguishers() {
                 }
             } else {
                 setIsLoggedIn(false);
-                setUser Email(null);
+                setUserEmail(null);
                 setFavoriteExtinguisherIds([]);
             }
         });
