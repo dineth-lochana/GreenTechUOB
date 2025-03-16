@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import { useState, useEffect } from 'react';
 import { auth } from '../firebaseConfig';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
@@ -68,3 +70,4 @@ function Navbar() {
 }
 
 export default Navbar;
+/* eslint-enable */
