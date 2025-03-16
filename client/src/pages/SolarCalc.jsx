@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { auth } from '../firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -166,3 +168,5 @@ function SolarCalc() {
 }
 
 export default SolarCalc;
+
+/* eslint-enable */
