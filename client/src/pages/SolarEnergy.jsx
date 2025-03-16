@@ -167,21 +167,18 @@ function SolarEnergy() {
 
     const handleShare = async (productDetails) => {
         try {
-            const shareData = {
-                title: productDetails.name,
-                text: `Check out this solar product: ${productDetails.name}. Price: ${productDetails.price}. Details: ${productDetails.content}. Additional Info: ${productDetails.misc}`,
-                url: window.location.href, // Current page URL (consider adding routing for direct links)
-            };
-
-            if (navigator.share) {
-                await navigator.share(shareData);
-            } else {
-                // Fallback: Copy text to clipboard
-                await navigator.clipboard.writeText(
-                    `${shareData.title}\n${shareData.text}\n${shareData.url}`
-                );
-                alert('Product details copied to clipboard!');
-            }
+            const subject = `Check out this solar product: ${productDetails.name}`;
+            const body = `Details of the solar product:\n\n` +
+                         `Name: ${productDetails.name}\n` +
+                         `Price: ${productDetails.price}\n` +
+                         `Content: ${productDetails.content}\n` +
+                         `Additional Info: ${productDetails.misc}\n\n` +
+                         `Check it out!`;
+    
+            const gmailLink = `https://mail.google.com/mail/?view=cm&fs=1&to=&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    
+            window.open(gmailLink, '_blank');
+    
         } catch (error) {
             console.error('Error sharing:', error);
             alert('Sharing failed. Please try again.');
