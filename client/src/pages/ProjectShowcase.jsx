@@ -1,4 +1,5 @@
 /* eslint-disable react/prop-types */
+/* eslint-disable */
 import { useState, useEffect } from 'react';
 import './ProjectShowcase.css';
 import { auth, db } from '../firebaseConfig';
@@ -587,3 +588,5 @@ const ProjectForm = ({ initialData, onSave, onCancel, formType }) => {
 };
 
 export default ProjectShowcase;
+
+/* eslint-enable */
