@@ -184,20 +184,19 @@ function ProjectShowcase() {
 
     const handleShare = async (projectDetails) => {
         try {
-            const shareData = {
-                title: projectDetails.name,
-                text: `Check out this project: ${projectDetails.name}. Capacity: ${projectDetails.capacity}. Details: ${projectDetails.content}. Additional Info: ${projectDetails.misc}`,
-                url: window.location.href,
-            };
-
-            if (navigator.share) {
-                await navigator.share(shareData);
-            } else {
-                await navigator.clipboard.writeText(
-                    `${shareData.title}\n${shareData.text}\n${shareData.url}`
-                );
-                alert('Project details copied to clipboard!');
-            }
+            const subject = `Check out this project: ${projectDetails.name}`;
+            const body = `Details of the project:\n\n` +
+                         `Name: ${projectDetails.name}\n` +
+                         `Client: ${projectDetails.client}\n` +
+                         `Capacity: ${projectDetails.capacity}\n` +
+                         `Category: ${projectDetails.category}\n` +
+                         `Description: ${projectDetails.description}\n\n` +
+                         `Check it out!`;
+    
+            const gmailLink = `https://mail.google.com/mail/?view=cm&fs=1&to=&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    
+            window.open(gmailLink, '_blank');
+    
         } catch (error) {
             console.error('Error sharing:', error);
             alert('Sharing failed. Please try again.');
