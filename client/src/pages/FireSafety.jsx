@@ -384,7 +384,7 @@ const handleShare = async (extinguisherDetails) => {
 
     return (
         <div className="fire-extinguishers-page">
-            <h1>Fire Extinguishers Page</h1>
+            <h1>Detection and Protection</h1>
             {isLoggedIn && !isCreatingNew && !isEditing && !selectedExtinguisherId && (
                 <button onClick={handleNewEntryClick} className="new-entry-button">New Entry</button>
             )}
