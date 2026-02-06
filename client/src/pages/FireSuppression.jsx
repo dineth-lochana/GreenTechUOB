@@ -1,4 +1,5 @@
 /* eslint-disable react/prop-types */
+//2-6-26
 import { useState, useEffect } from 'react';
 import './FireSuppression.css';
 import { auth, db } from '../firebaseConfig';
