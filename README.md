@@ -34,7 +34,7 @@
 4. Success! The Production Build is working!
 
 ## Security Scan Report 🛡️
-Last Updated: 2025-05-17 00:54:27 UTC
+Last Updated: 2026-02-06 04:15:52 UTC
 
 ### Semgrep Findings
 ✅ Semgrep Scan Passed
@@ -50,6 +50,66 @@ No Semgrep results found
 ### Trivy Vulnerability Scan
 ✅ Trivy Scan Passed
 ```
+- Package: react-router
+Installed Version: 7.5.2
+Vulnerability CVE-2025-59057
+Severity: HIGH
+Fixed Version: 7.9.0
+Link: [CVE-2025-59057](https://avd.aquasec.com/nvd/cve-2025-59057)
+- Package: react-router
+Installed Version: 7.5.2
+Vulnerability CVE-2026-21884
+Severity: HIGH
+Fixed Version: 7.12.0
+Link: [CVE-2026-21884](https://avd.aquasec.com/nvd/cve-2026-21884)
+- Package: react-router
+Installed Version: 7.5.2
+Vulnerability CVE-2026-22029
+Severity: HIGH
+Fixed Version: 7.12.0
+Link: [CVE-2026-22029](https://avd.aquasec.com/nvd/cve-2026-22029)
+- Package: react-router
+Installed Version: 7.5.2
+Vulnerability CVE-2025-68470
+Severity: MEDIUM
+Fixed Version: 6.30.2, 7.9.6
+Link: [CVE-2025-68470](https://avd.aquasec.com/nvd/cve-2025-68470)
+- Package: react-router
+Installed Version: 7.5.2
+Vulnerability CVE-2026-22030
+Severity: MEDIUM
+Fixed Version: 7.12.0
+Link: [CVE-2026-22030](https://avd.aquasec.com/nvd/cve-2026-22030)
+- Package: sweetalert2
+Installed Version: 11.17.2
+Vulnerability GHSA-457r-cqc8-9vj9
+Severity: LOW
+Fixed Version: 11.22.4
+Link: [GHSA-457r-cqc8-9vj9](https://github.com/advisories/GHSA-457r-cqc8-9vj9)
+- Package: sweetalert2
+Installed Version: 11.17.2
+Vulnerability GHSA-8jh9-wqpf-q52c
+Severity: LOW
+Fixed Version: 11.22.4
+Link: [GHSA-8jh9-wqpf-q52c](https://github.com/advisories/GHSA-8jh9-wqpf-q52c)
+- Package: sweetalert2
+Installed Version: 11.17.2
+Vulnerability GHSA-mrr8-v49w-3333
+Severity: LOW
+Fixed Version: 11.22.4
+Link: [GHSA-mrr8-v49w-3333](https://github.com/advisories/GHSA-mrr8-v49w-3333)
+- Package: sweetalert2
+Installed Version: 11.17.2
+Vulnerability GHSA-pg98-6v7f-2xfv
+Severity: LOW
+Fixed Version: 11.22.4
+Link: [GHSA-pg98-6v7f-2xfv](https://github.com/advisories/GHSA-pg98-6v7f-2xfv)
+- Package: sweetalert2
+Installed Version: 11.17.2
+Vulnerability GHSA-qq6h-5g6j-q3cm
+Severity: LOW
+Fixed Version: 11.22.4
+Link: [GHSA-qq6h-5g6j-q3cm](https://github.com/advisories/GHSA-qq6h-5g6j-q3cm)
 ```
 ### CodeQL Analysis
 ✅ CodeQL Analysis Results Retrieved
