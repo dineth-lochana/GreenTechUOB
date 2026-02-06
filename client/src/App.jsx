@@ -24,6 +24,7 @@ function App() {
                     <Route path="/solar" element={<SolarEnergy />} />
                     <Route path="/fireSafety" element={<FireSafety />} />
                     <Route path="/variableDrives" element={<VariableDrives />} />
+                    <Route path="/FireSuppression" element={<FireSuppression />} />
                     <Route path="/projectShowcase" element={<ProjectShowcase />} />
                     <Route path="/loginRegister" element={<LoginRegister />} />
                     <Route path="/Learn" element={<Learn />} />
