@@ -8,6 +8,7 @@ import FireSafety from './pages/FireSafety.jsx';
 import VariableDrives from './pages/VariableDrives.jsx';
 import ProjectShowcase from './pages/ProjectShowcase.jsx';
 import LoginRegister from './pages/LoginRegister.jsx';
+import FireSuppression from './pages/FireSuppression.jsx';
 import Learn from './pages/Learn.jsx';
 import NotFound from './pages/NotFound.jsx';
 import './App.css';
